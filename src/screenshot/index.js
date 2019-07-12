@@ -26,7 +26,7 @@ module.exports = async (selector, name) => {
         encoding: 'binary' // base64 binary
     })
 
-    if (!fs.existsSync(path.join(utils.screenshotSavePath, 'A', name))) {
+    if (!fs.existsSync(path.join(utils.screenshotSaveFolder, 'A', name))) {
         saveTo(name, 'A', image)
     } else {
         saveTo(name, 'B', image)
@@ -35,17 +35,17 @@ module.exports = async (selector, name) => {
         if (!res.passed) {
             throw new Error(
                 `To much differences between the two screenshots, [${path.join(
-                    utils.screenshotSavePath,
+                    utils.screenshotSaveFolder,
                     'A',
                     name
                 ) +
                     '] & [' +
                     path.join(
-                        utils.screenshotSavePath,
+                        utils.screenshotSaveFolder,
                         'B',
                         name
                     )}], the differences you can find out in [${path.join(
-                    utils.screenshotSavePath,
+                    utils.screenshotSaveFolder,
                     'output',
                     name
                 )}]`
@@ -55,9 +55,9 @@ module.exports = async (selector, name) => {
 }
 
 function diff(name) {
-    const AImage = path.join(utils.screenshotSavePath, 'A', name)
-    const BImage = path.join(utils.screenshotSavePath, 'B', name)
-    const OImage = path.join(utils.screenshotSavePath, 'output', name)
+    const AImage = path.join(utils.screenshotSaveFolder, 'A', name)
+    const BImage = path.join(utils.screenshotSaveFolder, 'B', name)
+    const OImage = path.join(utils.screenshotSaveFolder, 'output', name)
 
     return new Promise((r, rj) => {
         var bdiff = new BlinkDiff({
@@ -89,7 +89,7 @@ function diff(name) {
 }
 
 function saveTo(name, target, image) {
-    const folder = path.join(utils.screenshotSavePath, target)
+    const folder = path.join(utils.screenshotSaveFolder, target)
     if (!fs.existsSync(folder)) {
         fs.mkdirpSync(folder)
     }

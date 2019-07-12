@@ -25,7 +25,13 @@ export interface TestKit {
     setBrowser(browser: any): Promise<void>
     setCurrentPage(page: any): Promise<void>
 
-    setScreenshotFolder(folderPath: string): Promise<void>
+    mock(
+        maps: { [path: string]: string },
+        headers?: { key: string }
+    ): Promise<void>
+
+    setScreenshotFolder(folderPath: string): void
+    setMockDataFolder(folderPath: string): void
 }
 interface $Expect {
     title(title: string): Promise<void>

@@ -5,11 +5,13 @@ const VSelector = require('./VSelector')
 const expects = require('./bom/expects')
 const waitFors = require('./bom/waitFors')
 const location = require('./bom/location')
+const mock = require('./mock')
 
 browser = null
 page = null
 
-utils.screenshotSavePath = path.join(process.cwd(), 'screenshot')
+utils.screenshotSaveFolder = path.join(process.cwd(), 'screenshot')
+utils.mockDataFolder = path.join(process.cwd(), 'mock')
 
 function TestKit(selector) {
     if (!selector) {
@@ -34,9 +36,15 @@ TestKit.setBrowser = async (b) => {
     })
 }
 
-TestKit.setScreenshotFolder = (savePath) => {
-    utils.screenshotSavePath = savePath
+TestKit.setScreenshotFolder = (folderPath) => {
+    utils.screenshotSaveFolder = folderPath
 }
+
+TestKit.setMockDataFolder = (folderPath) => {
+    utils.mockDataFolder = folderPath
+}
+
+TestKit.mock = mock
 
 function initPage(p) {
     // TODO: 可能会比较慢，导致 $Z undifined，需要一个机制去告知用例执行时机

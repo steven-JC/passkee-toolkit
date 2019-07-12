@@ -15,9 +15,9 @@ const $: TestKit = require('../index')
 describe('puppeteer-testkit', () => {
     before(async () => {
         let browser = await puppeteer.launch({
-            headless: false
+            headless: false,
             //headless: true
-            //devtools: true
+            devtools: true
         })
 
         let page = (await browser.pages())[0]
