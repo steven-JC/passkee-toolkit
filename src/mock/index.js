@@ -16,6 +16,7 @@ module.exports = async (maps, headers) => {
     for (let i = 0; i < paths.length; i++) {
         ;((index) => {
             promises.push(
+                // 同时多个waitforrequest 会导致同一个请求同时进入，因此需要控制好handle的次数
                 page.waitForRequest(
                     (request) => {
                         const current = url.parse(request.url()).pathname
