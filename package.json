@@ -4,7 +4,7 @@
     "description": "A toolkit for DOM & BOM operation with puppeteer in nodejs environment, which greatly improves test case development efficiency",
     "main": "src/TestKit.js",
     "scripts": {
-        "test": "mocha -r register.js test/index.ts --watch --watch-extensions ts,json --recursive --full-trace --timeout 10000",
+        "test": "mocha -r register.js test/index.ts --recursive --full-trace --timeout 10000",
         "test-dev": "mocha -r register.js test/index.ts --watch --watch-extensions ts,json --recursive --inspect --full-trace --bail --debug --async-only --timeout 10000",
         "report": "mocha -r register.js test/index.ts  --recursive --full-trace -O reportDir=report --reporter JSON --timeout 10000"
     },
