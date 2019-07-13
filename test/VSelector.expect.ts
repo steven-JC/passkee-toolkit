@@ -14,7 +14,6 @@ const props0 = [
     'index',
     'scrollTop',
     'visible',
-    'exist',
     'length'
 ]
 // // 有参数
@@ -33,6 +32,8 @@ export default () => {
         .filter((item) => ['val'].indexOf(item) === -1)
         .forEach((method) => {
             it(`VSelector.expect.${method}(NOT_EMPTY)`, async () => {
+                if (method === 'visible')
+                    console.log($('#for-ppt-test').expect[method])
                 await $('#for-ppt-test').expect[method]($.constants.NOT_EMPTY)
             })
         })

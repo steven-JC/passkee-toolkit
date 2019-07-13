@@ -1,7 +1,7 @@
 const { CompareVars } = require('../constants')
 const qs = require('qs')
 const url = require('url')
-
+const SpinnerLog = require('./SpinnerLog')
 class TimeoutError extends Error {
     constructor(message) {
         super(message)
@@ -17,6 +17,35 @@ class ExpectError extends Error {
 }
 
 const utils = {
+    debugMode: false,
+    log(text, options) {
+        for (const x in options) {
+            let str
+            switch (x) {
+                case 'selectors':
+                    str = options[x]
+                        .map(
+                            (item) =>
+                                `${item.type}(${item.params
+                                    .map((item) => item.toString())
+                                    .join(',')})`
+                        )
+                        .join('.')
+                    text = `${str} ${text} `
+                    break
+                case 'mockMaps':
+                    str = Object.keys(options[x])
+                        .map((item) => `${item}:${options[x][item]}`)
+                        .join(',')
+                    text = `${text} ${str}`
+                    break
+                default:
+                    text = `${text} ${x}`
+                    break
+            }
+        }
+        return new SpinnerLog(text, !utils.debugMode)
+    },
     compareUrl: (urlOrPathOrHash, basetUrl, silent) => {
         const base = utils.parseUrl(basetUrl, basetUrl)
         const urlObj = utils.parseUrl(urlOrPathOrHash, basetUrl)
@@ -172,14 +201,16 @@ const utils = {
                             check()
                         } else {
                             rj(
-                                new TimeoutError(
-                                    errorMsg.replace(
-                                        /\(\#\)/g,
-                                        `(timeout: ${opts.timeout}, delay: ${
-                                            opts.delay
-                                        })`
-                                    )
-                                )
+                                errorMsg
+                                    ? new TimeoutError(
+                                          errorMsg.replace(
+                                              /\(\#\)/g,
+                                              `(timeout: ${
+                                                  opts.timeout
+                                              }, delay: ${opts.delay})`
+                                          )
+                                      )
+                                    : null
                             )
                         }
                     } else {

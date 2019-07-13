@@ -14,7 +14,6 @@ const props0 = [
     'index',
     'scrollTop',
     'visible',
-    'exist',
     'length'
 ]
 // // 有参数
@@ -74,6 +73,8 @@ export default () => {
     it('VSelector.prototype.mouseDown', async () => {
         await $('#input-bottom2').focus()
         await $('#input-bottom1').blur()
+        await $('#input-bottom1').waitFor.length(1)
+        await $('#input-bottom1').expect.length(1)
         await $('#input-bottom2').mousedown()
         await $('#input-bottom2').screenshot(
             'VSelector.prototype.mouseDown.png'

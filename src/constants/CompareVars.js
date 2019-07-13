@@ -1,8 +1,8 @@
 module.exports = {
-    UNDEFINED: Symbol('_UNDEFINED_'),
-    NULL: Symbol('_NULL_'),
-    EMPTY: Symbol('_EMPTY_'), // 空串
-    NOT_EMPTY: Symbol('_NOT_EMPTY_')
+    UNDEFINED: 'UNDEFINED',
+    NULL: 'NULL',
+    EMPTY: 'EMPTY', // 空串
+    NOT_EMPTY: 'NOT_EMPTY'
 }
 
 module.exports.default = module.exports

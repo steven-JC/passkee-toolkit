@@ -2,7 +2,7 @@ import { TestKit } from '@/typings/TestKit'
 const $: TestKit = require('../index')
 declare var $Z
 export default () => {
-    it.only('mock list', async () => {
+    it('mock list', async () => {
         $.page.evaluate(() => {
             $Z.ajax({
                 url: '/api/list?0',
@@ -16,7 +16,7 @@ export default () => {
         await $.mock({ '/api/list': '0.json' })
     })
 
-    it.only('mock list*2', async () => {
+    it('mock list*2', async () => {
         $.mock({ '/api/list': '0.json' })
         await $.page.evaluate(() => {
             let res
@@ -39,11 +39,11 @@ export default () => {
         await $.delay(1000)
     })
 
-    it.only('mock list detail', async () => {
-        $.mock({ '/api/list': '0.json', '/api/detail': 'all.json' })
+    it('mock list detail', async () => {
+        $.mock({ '/api/list': '0.json', '/api/detail1': 'all.json' })
         await $.page.evaluate(() => {
             $Z.ajax({
-                url: '/api/detail',
+                url: '/api/detail1',
                 success(data) {
                     console.log(data)
                 }
@@ -59,7 +59,7 @@ export default () => {
         await $.delay(1000)
     })
 
-    it.only('mock list detail * 3 sync', async () => {
+    it('mock list detail * 3 sync', async () => {
         $.mock({
             '/api/list': '0.json',
             '/api/detail1': 'all.json',

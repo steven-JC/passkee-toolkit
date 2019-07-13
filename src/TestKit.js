@@ -36,6 +36,15 @@ TestKit.setBrowser = async (b) => {
     })
 }
 
+TestKit.page = null
+TestKit.setCurrentPage = async (p) => {
+    page = TestKit.page = p
+}
+
+TestKit.setDebugMode = (yes) => {
+    utils.debugMode = yes
+}
+
 TestKit.setScreenshotFolder = (folderPath) => {
     utils.screenshotSaveFolder = folderPath
 }
@@ -44,7 +53,20 @@ TestKit.setMockDataFolder = (folderPath) => {
     utils.mockDataFolder = folderPath
 }
 
-TestKit.mock = mock
+TestKit.setMockOptions = (options) => {
+    utils.mockOptions = Object.assign({ timeout: 2000, headers: {} }, options)
+}
+
+TestKit.mock = (maps, options) => {
+    const spinner = utils.log(`mocking for request`, { mockMaps: maps })
+    return mock(maps, options)
+        .then(() => {
+            spinner.succeed()
+        })
+        .catch((e) => {
+            spinner.fail(e)
+        })
+}
 
 function initPage(p) {
     // TODO: 可能会比较慢，导致 $Z undifined，需要一个机制去告知用例执行时机
@@ -65,18 +87,25 @@ function initPage(p) {
 }
 
 TestKit.reload = async (opts) => {
-    const res = await TestKit.page.reload(opts)
-    await page.waitForFunction('window.$Z')
-    return res
+    const spinner = utils.log(`reload page`)
+    try {
+        const res = await TestKit.page.reload(opts)
+        await page.waitForFunction('window.$Z')
+        spinner.succeed()
+        return res
+    } catch (e) {
+        spinner.fail(e)
+    }
 }
 
 TestKit.title = async () => {
-    return await page.title()
-}
-
-TestKit.page = null
-TestKit.setCurrentPage = async (p) => {
-    page = TestKit.page = p
+    const spinner = utils.log(`get page title`)
+    const res = await page.title()
+    if (res) {
+        spinner.succeed(res)
+    } else {
+        spinner.fail()
+    }
 }
 
 TestKit.findTarget = utils.findTarget
@@ -84,11 +113,18 @@ TestKit.closeTarget = utils.closeTarget
 TestKit.location = location
 
 TestKit.delay = (ms) => {
+    const spinner = utils.log(`delay ${ms || 1000}ms`)
     return new Promise((r, rj) => {
         setTimeout(() => {
             r()
         }, ms || 1000)
     })
+        .then(() => {
+            spinner.succeed()
+        })
+        .catch((e) => {
+            spinner.fail(e)
+        })
 }
 
 utils.defineFreezedProps(TestKit, { waitFor: waitFors, expect: expects })

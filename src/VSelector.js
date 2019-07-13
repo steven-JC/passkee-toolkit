@@ -1,3 +1,4 @@
+const ora = require('ora')
 const click = require('./triggers/click')
 const mousedown = require('./triggers/mouseDown')
 const mouseup = require('./triggers/mouseUp')
@@ -35,132 +36,112 @@ class VSelector {
 
         props0.forEach((item) => {
             waitFors[item] = async (value, options) => {
-                await utils.waitFor(
-                    async () => {
+                const spinner = utils.log(`wait for ${item} to be ${value}`, {
+                    selectors: this.selectors
+                })
+                await utils
+                    .waitFor(async () => {
                         return utils.equat(
                             await $(this.selectors)[item](),
                             value
                         )
-                    },
-                    options,
-                    `waiting for ${utils.converToString(
-                        this.selectors
-                    )}.${item}() to be '${value.toString()}' but timeout (#)`
-                )
+                    }, options)
+                    .then(() => {
+                        spinner.succeed()
+                    })
+                    .catch((e) => {
+                        spinner.fail(e)
+                    })
             }
         })
 
         props1.forEach((item) => {
             waitFors[item] = async (name, value, options) => {
-                await utils.waitFor(
-                    async () => {
+                const spinner = utils.log(
+                    `wait for ${item} ${name} to be ${value}`,
+                    {
+                        selectors: this.selectors
+                    }
+                )
+                await utils
+                    .waitFor(async () => {
                         return utils.equat(
                             await $(this.selectors)[item](name),
                             value
                         )
-                    },
-                    options,
-                    `waiting for ${utils.converToString(
-                        this.selectors
-                    )}.${item}(${name}) to be '${value.toString()}' but timeout (#)`
-                )
+                    }, options)
+                    .then(() => {
+                        spinner.succeed()
+                    })
+                    .catch((e) => {
+                        spinner.fail(e)
+                    })
+            }
+        })
+        ;['visible', 'length'].forEach((item) => {
+            waitFors[item] = async (value, options) => {
+                const spinner = utils.log(`wait for ${item} to be ${value}`, {
+                    selectors: this.selectors
+                })
+                await utils
+                    .waitFor(async () => {
+                        return utils.equat(await this[item](true), value)
+                    }, options)
+                    .then(() => {
+                        spinner.succeed()
+                    })
+                    .catch((e) => {
+                        spinner.fail(e)
+                    })
+            }
+            expects[item] = async (value) => {
+                const spinner = utils.log(`expect ${item} to be ${value}`, {
+                    selectors: this.selectors
+                })
+                if (!utils.equat(await this[item](true), value)) {
+                    spinner.fail()
+                } else {
+                    spinner.succeed()
+                }
             }
         })
 
-        waitFors.visible = async (value, options) => {
-            await utils.waitFor(
-                async () => {
-                    return utils.equat(await this.visible(), value)
-                },
-                options,
-                `waiting for ${utils.converToString(
-                    this.selectors
-                )}.visible() to be '${value.toString()}' but timeout (#)`
-            )
-        }
-
-        waitFors.exist = async (value, options) => {
-            await utils.waitFor(
-                async () => {
-                    return utils.equat(await this.exist(), value)
-                },
-                options,
-                `waiting for ${utils.converToString(
-                    this.selectors
-                )}.exist() to be '${value.toString()}' but timeout (#)`
-            )
-        }
-
-        waitFors.length = async (value, options) => {
-            await utils.waitFor(
-                async () => {
-                    return utils.equat(await this.length(), value)
-                },
-                options,
-                `waiting for ${utils.converToString(
-                    this.selectors
-                )}.length() to be '${value.toString()}' but timeout (#)`
-            )
-        }
-
         props0.forEach((item) => {
             expects[item] = async (value) => {
+                const spinner = utils.log(`expect ${item} to be ${value}`, {
+                    selectors: this.selectors
+                })
                 if (!utils.equat(await $(this.selectors)[item](), value)) {
-                    throw new utils.ExpectError(
-                        `expect ${utils.converToString(
-                            this.selectors
-                        )}.${item}() to be '${value.toString()}' but false`
-                    )
+                    spinner.fail()
+                } else {
+                    spinner.succeed()
                 }
             }
         })
 
         props1.forEach((item) => {
             expects[item] = async (name, value) => {
+                const spinner = utils.log(
+                    `expect ${item} ${name} to be ${value}`,
+                    {
+                        selectors: this.selectors
+                    }
+                )
                 if (!utils.equat(await $(this.selectors)[item](name), value)) {
-                    throw new utils.ExpectError(
-                        `expect ${utils.converToString(
-                            this.selectors
-                        )}.${item}(${name}) to be '${value.toString()}' but false`
-                    )
+                    spinner.fail()
+                } else {
+                    spinner.succeed()
                 }
             }
         })
-
-        expects.visible = async (value) => {
-            if (!utils.equat(await this.visible(), value)) {
-                throw new utils.ExpectError(
-                    `expect ${utils.converToString(
-                        this.selectors
-                    )}.visible() to be '${value.toString()}' but false`
-                )
-            }
-        }
-
-        expects.exist = async (value) => {
-            if (!utils.equat(await this.exist(), value)) {
-                throw new utils.ExpectError(
-                    `expect ${utils.converToString(
-                        this.selectors
-                    )}.exist() to be '${value.toString()}' but false`
-                )
-            }
-        }
-
-        expects.length = async (value) => {
-            if (!utils.equat(await this.length(), value)) {
-                throw new utils.ExpectError(
-                    `expect ${utils.converToString(
-                        this.selectors
-                    )}.length() to be '${value.toString()}' but false`
-                )
-            }
-        }
 
         const mouseTriggers = {}
 
         Object.keys(mTriggers).forEach((trigger) => {
             mouseTriggers[trigger] = async (offset) => {
+                const spinner = utils.log(`${trigger}`, {
+                    selectors: this.selectors
+                })
                 try {
                     this.domSelector = await utils.converToDomSelector(
                         utils.assignSelectors(this.selectors, [
@@ -173,17 +154,17 @@ class VSelector {
                         this.domSelector,
                         offset
                     )
+                    spinner.succeed()
                 } catch (e) {
-                    throw new Error(
-                        `selectors:${JSON.stringify(this.selectors)}\n\n${
-                            e.message
-                        }`
-                    )
+                    spinner.fail(e)
                 }
             }
             if (trigger !== 'mouseMove') {
                 Object.keys(MouseButton).forEach((btn) => {
                     mouseTriggers[trigger][btn] = async (offset) => {
+                        const spinner = utils.log(`${trigger} ${btn}`, {
+                            selectors: this.selectors
+                        })
                         try {
                             this.domSelector = await utils.converToDomSelector(
                                 utils.assignSelectors(this.selectors, [
@@ -197,12 +178,9 @@ class VSelector {
                                 offset,
                                 btn
                             )
+                            spinner.succeed()
                         } catch (e) {
-                            throw new Error(
-                                `selectors:${JSON.stringify(
-                                    this.selectors
-                                )}\n\n${e.message}`
-                            )
+                            spinner.fail(e)
                         }
                     }
                 })
@@ -220,13 +198,25 @@ class VSelector {
         )
     }
 
-    async length() {
-        return await page.evaluate((selectors) => {
-            return $Z.$select(selectors).length
-        }, this.selectors)
+    async length(silent) {
+        const spinner = silent
+            ? null
+            : utils.log(`length`, { selectors: this.selectors })
+        let length
+        try {
+            length = await page.evaluate((selectors) => {
+                return $Z.$select(selectors).length
+            }, this.selectors)
+            !silent && spinner.succeed(length)
+        } catch (e) {
+            !silent && spinner.fail(e)
+        }
+
+        return length
     }
 
     async blur(offsetY) {
+        const spinner = utils.log(`blur`, { selectors: this.selectors })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -235,15 +225,15 @@ class VSelector {
                 ])
             )
             await blur(this.domSelector, offsetY)
-            return this
+            await page.waitFor(2000)
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async focus() {
+        const spinner = utils.log(`focus`, { selectors: this.selectors })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -252,15 +242,16 @@ class VSelector {
                 ])
             )
             await page.focus(this.domSelector)
-            return this
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async input(content, autoBlur) {
+        const spinner = utils.log(`input ${content}`, {
+            selectors: this.selectors
+        })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -269,15 +260,16 @@ class VSelector {
                 ])
             )
             await input(this.domSelector, content, autoBlur)
-            return this
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async type(content, autoBlur = true) {
+        const spinner = utils.log(`type ${content}`, {
+            selectors: this.selectors
+        })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -289,14 +281,16 @@ class VSelector {
             if (autoBlur) {
                 await blur(this.domSelector)
             }
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async hover() {
+        const spinner = utils.log(`hover`, {
+            selectors: this.selectors
+        })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -305,14 +299,16 @@ class VSelector {
                 ])
             )
             await page.hover(this.domSelector)
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async upload(filePaths) {
+        const spinner = utils.log(`upload ${filePaths}`, {
+            selectors: this.selectors
+        })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -325,19 +321,23 @@ class VSelector {
                 (el) => el.tagName === 'INPUT' && el.type === 'file'
             )
             if (!isFileInput) {
-                throw new Error(`[TestKit] the element should be file input`)
+                spinner.fail(
+                    new Error(`[TestKit] the element should be file input`)
+                )
             }
 
             const el = await page.$(this.domSelector)
             await utils.apply(el.uploadFile, filePaths, el)
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
     async screenshot(name) {
+        const spinner = utils.log(`screenshot ${name}`, {
+            selectors: this.selectors
+        })
         try {
             this.domSelector = await utils.converToDomSelector(
                 utils.assignSelectors(this.selectors, [
@@ -346,10 +346,9 @@ class VSelector {
                 ])
             )
             await screenshot(this.domSelector, name)
+            spinner.succeed()
         } catch (e) {
-            throw new Error(
-                `selectors:${JSON.stringify(this.selectors)}\n\n${e.message}`
-            )
+            spinner.fail(e)
         }
     }
 
@@ -391,18 +390,23 @@ const selectors = [
     'last'
 ]
 
-VSelector.prototype.visible = async function() {
-    const selector = await utils.converToDomSelector(this.selectors)
-    if (!selector) return false
-    return await utils.visible(await utils.converToDomSelector(this.selectors))
+VSelector.prototype.visible = async function(silent) {
+    const spinner = silent
+        ? null
+        : utils.log(`visible`, { selectors: this.selectors })
+    let visible
+    try {
+        const selector = await utils.converToDomSelector(this.selectors)
+        if (!selector) return false
+        visible = await utils.visible(
+            await utils.converToDomSelector(this.selectors)
+        )
+        !silent && spinner.succeed(visible)
+    } catch (e) {
+        !silent && spinner.fail(e)
+    }
+    return visible
 }
-
-VSelector.prototype.exist = async function() {
-    const selector = await utils.converToDomSelector(this.selectors)
-    if (!selector) return false
-    return await utils.exist(selector)
-}
-
 // 选择器
 selectors.forEach((item) => {
     VSelector.prototype[item] = function() {
@@ -416,30 +420,48 @@ selectors.forEach((item) => {
 
 // 无参数
 props0.forEach((it) => {
-    VSelector.prototype[it] = async function() {
-        return await page.$eval(
-            'body',
-            (el, selectors, method) => {
-                return $Z.$select(selectors)[method]()
-            },
-            this.selectors,
-            it
-        )
+    VSelector.prototype[it] = async function(silent) {
+        const spinner = silent
+            ? null
+            : utils.log(`visible`, { selectors: this.selectors })
+        try {
+            const res = await page.$eval(
+                'body',
+                (el, selectors, method) => {
+                    return $Z.$select(selectors)[method]()
+                },
+                this.selectors,
+                it
+            )
+            !silent && spinner.succeed(res)
+            return res
+        } catch (e) {
+            !silent && spinner.fail(e)
+        }
     }
 })
 
 // 一个参数
 props1.forEach((it) => {
-    VSelector.prototype[it] = async function(param) {
-        return await page.$eval(
-            'body',
-            (el, selectors, param, method) => {
-                return $Z.$select(selectors)[method](param)
-            },
-            this.selectors,
-            param,
-            it
-        )
+    VSelector.prototype[it] = async function(param, silent) {
+        const spinner = silent
+            ? null
+            : utils.log(`visible`, { selectors: this.selectors })
+        try {
+            const res = await page.$eval(
+                'body',
+                (el, selectors, param, method) => {
+                    return $Z.$select(selectors)[method](param)
+                },
+                this.selectors,
+                param,
+                it
+            )
+            !silent && spinner.succeed(res)
+            return res
+        } catch (e) {
+            !silent && spinner.fail(e)
+        }
     }
 })
 
