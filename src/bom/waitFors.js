@@ -4,35 +4,60 @@ const qs = require('qs')
 const expects = require('./expects')
 module.exports = {
     title: async (title, options) => {
-        await utils.waitFor(
-            async () => {
-                return expects.title(title, true)
-            },
-            options,
-            `waiting for title: ${title} but timeout (#)`
-        )
+        const spinner = utils.log(`wait for title to be ${title}`)
+        await utils
+            .waitFor(
+                async () => {
+                    return expects.title(title, true)
+                },
+                options,
+                `waiting for title: ${title} but timeout (#)`
+            )
+            .then(() => {
+                spinner.succeed()
+            })
+            .catch((e) => {
+                spinner.fail(e)
+            })
     },
     target: async (targetUrlSubstr, options) => {
-        await utils.waitFor(
-            async () => {
-                return expects.target(targetUrlSubstr, true)
-            },
-            options,
-            `waiting for target: ${targetUrlSubstr} but timeout (#)`
-        )
+        const spinner = utils.log(`wait for target exist, ${targetUrlSubstr}`)
+        await utils
+            .waitFor(
+                async () => {
+                    return expects.target(targetUrlSubstr, true)
+                },
+                options,
+                `waiting for target: ${targetUrlSubstr} but timeout (#)`
+            )
+            .then(() => {
+                spinner.succeed()
+            })
+            .catch((e) => {
+                spinner.fail(e)
+            })
     },
 
     location: async (urlOrPathOrHash, options) => {
-        await utils.waitFor(
-            async () => {
-                return expects.location(urlOrPathOrHash, true)
-            },
-            options,
-            `waiting for url || Path || Hash: ${urlOrPathOrHash},  but timeout (#)`
-        )
+        const spinner = utils.log(`wait for location to be ${urlOrPathOrHash}`)
+        await utils
+            .waitFor(
+                async () => {
+                    return expects.location(urlOrPathOrHash, true)
+                },
+                options,
+                `waiting for url || Path || Hash: ${urlOrPathOrHash},  but timeout (#)`
+            )
+            .then(() => {
+                spinner.succeed()
+            })
+            .catch((e) => {
+                spinner.fail(e)
+            })
     },
 
     request: async (urlOrPath, postData, options) => {
+        const spinner = utils.log(`wait for request, ${urlOrPath}`)
         let data
         try {
             await page.waitForRequest((request) => {
@@ -63,16 +88,14 @@ module.exports = {
                     return false
                 }
             }, options || { timeout: 2000 })
+            spinner.succeed()
         } catch (e) {
-            throw new utils.TimeoutError(
-                `waiting for request of: ${urlOrPath} ${
-                    postData ? ' and post data.' : ''
-                },  but timeout. `
-            )
+            spinner.fail()
         }
     },
 
     response: async (urlOrPath, options) => {
+        const spinner = utils.log(`wait for response 200, ${urlOrPath}`)
         try {
             await page.waitForResponse((response) => {
                 const urlObj = utils.parseUrl(response.url(), response.url())
@@ -82,21 +105,28 @@ module.exports = {
                     response.status() === 200
                 )
             }, options || { timeout: 2000 })
+            spinner.succeed()
         } catch (e) {
-            throw new utils.TimeoutError(
-                `waiting for response of: ${urlOrPath},  but timeout`
-            )
+            spinner.fail()
         }
     },
 
     fn: async (cb, options) => {
-        await utils.waitFor(
-            async () => {
-                return await cb()
-            },
-            options,
-            `waiting for callback return true but timeout (#)`
-        )
+        const spinner = utils.log(`wait for fn to return true`)
+        await utils
+            .waitFor(
+                async () => {
+                    return await cb()
+                },
+                options,
+                `waiting for callback return true but timeout (#)`
+            )
+            .then(() => {
+                spinner.succeed()
+            })
+            .catch((e) => {
+                spinner.fail(e)
+            })
     }
 }
 

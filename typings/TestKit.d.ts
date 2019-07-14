@@ -27,11 +27,13 @@ export interface TestKit {
 
     mock(
         maps: { [path: string]: string },
-        headers?: { key: string }
-    ): Promise<void>
+        options?: { timeout?: number; headers?: { [key: string]: string } }
+    ): void
 
+    setDebugMode(yes: boolean): void
     setScreenshotFolder(folderPath: string): void
     setMockDataFolder(folderPath: string): void
+    setMockHeaders(headers: { [key: string]: string }): void
 }
 interface $Expect {
     title(title: string): Promise<void>

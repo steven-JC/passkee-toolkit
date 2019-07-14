@@ -12,17 +12,20 @@ import VSelectorWaitFor from './VSelector.waitFor'
 
 const $: TestKit = require('../index')
 
+const time = Date.now()
+
 describe('puppeteer-testkit', () => {
     before(async () => {
         let browser = await puppeteer.launch({
             headless: false,
-            //headless: true
+            ////headless: true
             devtools: true
         })
 
         let page = (await browser.pages())[0]
 
         await $.setBrowser(browser)
+        $.setDebugMode(true)
 
         await page.setViewport({
             width: 1366,
@@ -124,6 +127,7 @@ describe('puppeteer-testkit', () => {
         await page.waitFor(1000)
     })
     after(() => {
+        console.log('All time cost ', Date.now() - time)
         //$.browser.close()
     })
     describe('TestKit', TK)

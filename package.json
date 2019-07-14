@@ -1,6 +1,6 @@
 {
     "name": "puppeteer-testkit",
-    "version": "0.4.5-alpha.6",
+    "version": "0.4.5-alpha.14",
     "description": "A toolkit for DOM & BOM operation with puppeteer in nodejs environment, which greatly improves test case development efficiency",
     "main": "src/TestKit.js",
     "scripts": {
@@ -51,6 +51,7 @@
     },
     "dependencies": {
         "blink-diff": "^1.0.13",
+        "ora": "^3.4.0",
         "qs": "^6.7.0"
     }
 }
