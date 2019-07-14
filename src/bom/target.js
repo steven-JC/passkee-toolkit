@@ -1,3 +1,4 @@
+const utils = require('../utils')
 module.exports = {
     async findTarget(urlSubstr, silent) {
         const spinner = silent ? null : utils.log(`find target ${urlSubstr}`)
