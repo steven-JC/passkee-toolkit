@@ -37,7 +37,6 @@ export declare class VSelector {
     scrollTop(): Promise<number>
 
     visible(): Promise<boolean>
-    exist(): Promise<boolean>
     length(): Promise<number>
 
     css(name: string): Promise<string>
@@ -72,7 +71,6 @@ interface DomWaitFor {
     index(value: number | Symbol, options?: WaitForOptions): Promise<void>
 
     visible(value: boolean, options?: WaitForOptions): Promise<void>
-    exist(value: boolean, options?: WaitForOptions): Promise<void>
     length(value: number, options?: WaitForOptions): Promise<void>
 
     scrollTop(value: number | Symbol, options?: WaitForOptions): Promise<void>
@@ -114,7 +112,6 @@ interface DomExpect {
     index(value: number | Symbol): Promise<void>
 
     visible(value: boolean): Promise<void>
-    exist(value: boolean): Promise<void>
     length(value: number): Promise<void>
 
     scrollTop(value: number | Symbol): Promise<void>

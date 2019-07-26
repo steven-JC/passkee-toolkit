@@ -1,4 +1,5 @@
 const { MouseButton } = require('../constants')
+const vars = require('../utils/vars')
 module.exports = async (selector, offset = {}, button) => {
     offset = Object.assign(
         {
@@ -20,17 +21,15 @@ module.exports = async (selector, offset = {}, button) => {
         }
     }
 
-    await page.mouse.move(
-        box.x + (offset.x ? offset.x : box.width / 2),
-        box.y + (offset.y ? offset.y : box.height / 2),
-        {
-            steps: 10
-        }
-    )
+    const x = box.x + (offset.x ? offset.x : box.width / 2)
+    const y = box.y + (offset.y ? offset.y : box.height / 2)
+
+    await page.mouse.move(x, y, {
+        steps: 10
+    })
     await page.waitFor(100)
-    await page.mouse.click(
-        box.x + (offset.x ? offset.x : box.width / 2),
-        box.y + (offset.y ? offset.y : box.height / 2),
-        { button: MouseButton[button] || 'left' }
-    )
+    await page.mouse.click(x, y, {
+        button: MouseButton[button] || 'left'
+    })
+    vars.lastPos = { x, y }
 }
