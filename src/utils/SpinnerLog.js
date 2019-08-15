@@ -19,9 +19,9 @@ class Log {
     fail(e) {
         if (!this.hide) {
             this.spinner.fail()
-            if (e) {
-                throw e
-            }
+        }
+        if (e) {
+            throw e
         }
     }
     warn(text = '') {
