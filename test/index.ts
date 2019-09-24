@@ -130,7 +130,7 @@ describe('puppeteer-testkit', () => {
         console.log('All time cost ', Date.now() - time)
         //$.browser.close()
     })
-    describe('TestKit', TK)
+    describe.only('TestKit', TK)
     describe('TestKit.expect', $expect)
     describe('TestKit.waitFor', $waitFor)
     describe('VSelector', VSelector)

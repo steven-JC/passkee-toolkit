@@ -52,9 +52,7 @@ const utils = {
         if (urlObj.protocol !== base.protocol) {
             if (!silent) {
                 throw new Error(
-                    `expected protocol ${urlObj.protocol}, but found ${
-                        base.protocol
-                    }`
+                    `expected protocol ${urlObj.protocol}, but found ${base.protocol}`
                 )
             }
             return false
@@ -70,9 +68,7 @@ const utils = {
         if (urlObj.pathname !== base.pathname) {
             if (!silent) {
                 throw new Error(
-                    `expected pathname ${urlObj.pathname}, but found ${
-                        base.pathname
-                    }`
+                    `expected pathname ${urlObj.pathname}, but found ${base.pathname}`
                 )
             }
             return false
@@ -125,17 +121,19 @@ const utils = {
         return true
     },
     parseUrl(uri, contextUrl) {
-        const context = url.parse(contextUrl)
-        if (uri[0] === '#') {
-            uri = context.baseUrl + uri
-        } else if (!/^[a-z]+?\:?\/\//.test(uri)) {
-            uri =
-                context.protocol +
-                '//' +
-                context.host +
-                (uri[0] === '/' ? uri : '/' + uri)
-        } else if (/^\/\//.test(uri)) {
-            uri = context.protocol + uri
+        if (contextUrl) {
+            const context = url.parse(contextUrl)
+            if (uri[0] === '#') {
+                uri = context.baseUrl + uri
+            } else if (!/^[a-z]+?\:?\/\//.test(uri)) {
+                uri =
+                    context.protocol +
+                    '//' +
+                    context.host +
+                    (uri[0] === '/' ? uri : '/' + uri)
+            } else if (/^\/\//.test(uri)) {
+                uri = context.protocol + uri
+            }
         }
 
         const urlObj = url.parse(uri)
@@ -205,9 +203,7 @@ const utils = {
                                     ? new TimeoutError(
                                           errorMsg.replace(
                                               /\(\#\)/g,
-                                              `(timeout: ${
-                                                  opts.timeout
-                                              }, delay: ${opts.delay})`
+                                              `(timeout: ${opts.timeout}, delay: ${opts.delay})`
                                           )
                                       )
                                     : null

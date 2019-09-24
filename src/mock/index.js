@@ -2,6 +2,8 @@ const utils = require('../utils')
 const fs = require('fs-extra')
 const path = require('path')
 const url = require('url')
+const ejs = require('ejs')
+const UrlPattern = require('url-pattern')
 const { ContentType } = require('../constants')
 let mocking = 0
 const errors = []
@@ -9,24 +11,37 @@ module.exports = async (maps, options) => {
     mocking++
     await page.setRequestInterception(true)
     const promises = []
-    const paths = Object.keys(maps)
+    const routes = Object.keys(maps)
 
     options = Object.assign({}, utils.mockOptions, options)
 
-    for (let i = 0; i < paths.length; i++) {
+    for (let i = 0; i < routes.length; i++) {
         ;((index) => {
+            const route = routes[i]
             promises.push(
                 // 同时多个waitforrequest 会导致同一个请求同时进入，因此需要控制好handle的次数
                 page.waitForRequest(
                     (request) => {
-                        const urlParsed = url.parse(request.url())
+                        const urlParsed = utils.parseUrl(request.url())
+                        console.log(urlParsed)
                         const current = urlParsed.pathname
-                        const fileName = maps[current]
+                        let fileName = maps[current]
+                        let params = {}
+                        if (!fileName) {
+                            const patterns = routes.map(
+                                (route) => new UrlPattern(route)
+                            )
+
+                            patterns.forEach((pattern, i) => {
+                                if ((params = pattern.match(current))) {
+                                    fileName = maps[routes[i]]
+                                }
+                            })
+                        }
                         if (fileName) {
                             const filePath = path.join(
                                 utils.mockDataFolder,
-                                current,
-                                fileName
+                                `${fileName}.ejs`
                             )
                             if (!fs.existsSync(filePath)) {
                                 errors.push(
@@ -36,9 +51,34 @@ module.exports = async (maps, options) => {
                                 return true
                             } else {
                                 try {
+                                    const tpl = fs.readFileSync(filePath, {
+                                        encoding: 'utf-8'
+                                    })
+
+                                    const res = ejs.render(
+                                        tpl,
+                                        Object.assign({ params }, urlParsed)
+                                    )
+
+                                    console.log(res)
+                                    let mockData
+                                    try {
+                                        mockData = JSON.parse(res)
+                                    } catch (e) {
+                                        throw new Error(
+                                            `[TestKit] ${filePath} is not a valid json file`
+                                        )
+                                    }
+
+                                    let body
+                                    if (typeof mockData.Body === 'object') {
+                                        body = JSON.stringify(mockData.Body)
+                                    } else {
+                                        body = mockData.Body || ''
+                                    }
                                     request
                                         .respond({
-                                            status: 200,
+                                            status: mockData.Status || 200,
                                             headers: Object.assign(
                                                 {
                                                     'access-control-allow-origin':
@@ -46,21 +86,16 @@ module.exports = async (maps, options) => {
                                                     'access-control-allow-credentials':
                                                         'true',
                                                     'Content-Type':
-                                                        ContentType[
-                                                            fileName
-                                                                .split('.')
-                                                                .pop()
-                                                        ] || 'application/json',
+                                                        'application/json',
                                                     'access-control-allow-methods':
                                                         '*',
                                                     'access-control-allow-headers':
                                                         '*'
                                                 },
-                                                options.headers
+                                                options.headers,
+                                                mockData.Headers || {}
                                             ),
-                                            body: fs.readFileSync(filePath, {
-                                                encoding: 'utf-8'
-                                            })
+                                            body
                                         })
                                         .catch((e) => {
                                             maps[current] = 0

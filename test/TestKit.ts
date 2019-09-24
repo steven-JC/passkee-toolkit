@@ -2,6 +2,32 @@ import { TestKit } from '@/typings/TestKit'
 const $: TestKit = require('../index')
 declare var $Z
 export default () => {
+    it('mock ejs', async () => {
+        $.page.evaluate(() => {
+            $Z.ajax({
+                url: '/api/list/page/1?a=1&b=2',
+                type: 'post',
+                async: false,
+                success(data) {
+                    console.log(data)
+                }
+            })
+        })
+        await $.mock({ '/api/list/page/:num': 'ejs' })
+    })
+    it('mock body null', async () => {
+        $.page.evaluate(() => {
+            $Z.ajax({
+                url: '/api/list?null',
+                type: 'post',
+                async: false,
+                success(data) {
+                    console.log(data)
+                }
+            })
+        })
+        await $.mock({ '/api/list': 'body-null' })
+    })
     it('mock list', async () => {
         $.page.evaluate(() => {
             $Z.ajax({
@@ -13,11 +39,11 @@ export default () => {
                 }
             })
         })
-        await $.mock({ '/api/list': '0.json' })
+        await $.mock({ '/api/list': '0' })
     })
 
     it('mock list*2', async () => {
-        $.mock({ '/api/list': '0.json' })
+        $.mock({ '/api/list': '0' })
         await $.page.evaluate(() => {
             let res
             $Z.ajax({
@@ -40,7 +66,7 @@ export default () => {
     })
 
     it('mock list detail', async () => {
-        $.mock({ '/api/list': '0.json', '/api/detail1': 'all.json' })
+        $.mock({ '/api/list': '0', '/api/detail1': 'all' })
         await $.page.evaluate(() => {
             $Z.ajax({
                 url: '/api/detail1',
@@ -61,10 +87,10 @@ export default () => {
 
     it('mock list detail * 3 sync', async () => {
         $.mock({
-            '/api/list': '0.json',
-            '/api/detail1': 'all.json',
-            '/api/detail2': 'all.json',
-            '/api/detail3': 'all.json'
+            '/api/list': '0',
+            '/api/detail1': 'all',
+            '/api/detail2': 'all',
+            '/api/detail3': 'all'
         })
         await $.page.evaluate(() => {
             $Z.ajax({
