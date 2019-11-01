@@ -1,6 +1,6 @@
 import constants from '../constants'
 
-import vars from '../utils/vars'
+import state from '../utils/state'
 
 declare const global: any
 
@@ -37,7 +37,7 @@ export default async (
     const y = box.y + (offset.y ? offset.y : box.height / 2)
     const steps = Math.ceil(
         Math.sqrt(
-            Math.pow(x - vars.lastPos.x, 2) + Math.pow(y - vars.lastPos.y, 2)
+            Math.pow(x - state.lastPos.x, 2) + Math.pow(y - state.lastPos.y, 2)
         ) / 5
     )
     await global.page.mouse.move(x, y, {
@@ -47,5 +47,5 @@ export default async (
     await global.page.mouse.down({
         button: constants.MouseButton[button] || 'left'
     })
-    vars.lastPos = { x, y }
+    state.lastPos = { x, y }
 }
