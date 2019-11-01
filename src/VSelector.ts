@@ -392,9 +392,7 @@ export default class VSelector {
     }
 
     /* to dev
-    async mouse() {}
     async press() {}
-    async screenshot() {}
     */
 }
 // 没参数
@@ -413,21 +411,7 @@ const props0 = [
 // 有参数
 const props1 = ['css', 'attr', 'prop', 'data', 'is', 'hasClass']
 // 选择器
-const selectors = [
-    'has',
-    'filter',
-    'not',
-    'parents',
-    'parent',
-    'children',
-    'siblings',
-    'prev',
-    'next',
-    'find',
-    'eq',
-    'first',
-    'last'
-]
+const selectors = ['filter', 'parents', 'parent', 'children', 'find', 'eq']
 
 // 选择器
 selectors.forEach((item) => {

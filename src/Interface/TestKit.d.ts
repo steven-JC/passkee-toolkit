@@ -1,4 +1,4 @@
-import { VSelector } from './VSelector'
+import { VSelector } from './IVSelector'
 import { Page, Browser, Target, NavigationOptions, Response } from 'puppeteer'
 
 export interface TestKit {
