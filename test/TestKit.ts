@@ -125,7 +125,7 @@ export default () => {
         })
     })
 
-    it.skip('mock list detail * 3 sync', async () => {
+    it('mock list detail * 3 sync', async () => {
         $.mock({
             '/api/list': '0',
             '/api/detail1': 'all',
