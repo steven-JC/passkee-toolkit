@@ -62,7 +62,7 @@ export declare class VSelector {
 }
 
 // offsetLeft offsetTop
-interface DomWaitFor {
+export interface DomWaitFor {
     text(value: string | Symbol, options?: WaitForOptions): Promise<void>
     html(value: string | Symbol, options?: WaitForOptions): Promise<void>
     height(value: string | Symbol, options?: WaitForOptions): Promise<void>
@@ -103,7 +103,7 @@ interface DomWaitFor {
 
     hasClass(name: string, value: boolean): Promise<void>
 }
-interface DomExpect {
+export interface DomExpect {
     text(value: string | Symbol): Promise<void>
     html(value: string | Symbol): Promise<void>
     height(value: string | Symbol): Promise<void>
@@ -125,7 +125,7 @@ interface DomExpect {
     hasClass(name: string | Symbol, value: boolean): Promise<void>
 }
 
-interface offset {
+export interface offset {
     x?: number
     y?: number
 }

@@ -118,9 +118,7 @@ TestKit.location = location
 TestKit.delay = (ms?) => {
     const spinner = utils.log(`delay ${ms || 1000}ms`)
     return new Promise((r, rj) => {
-        setTimeout(() => {
-            r()
-        }, ms || 1000)
+        setTimeout(r, ms || 1000)
     })
         .then(() => {
             spinner.succeed()
