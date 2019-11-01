@@ -1,169 +1,130 @@
-# puppeteer-testkit
+# tabletext
 
-### A toolkit for DOM operation with puppeteer in nodejs environment, which greatly improves test case development efficiency
-
-## Why
-
-I got tired of writing so many callbacks for DOM operations with puppeteer api.
+### Parse table-like string to object array, and reversely stringify object array to table-like string.
 
 ## Installation
 
 ```javascript
-npm install puppeteer-testkit --save-dev
+npm install tabletext --save-dev
 ```
 
-> This project already contains typings files, just enjoy programing with TypeScript
+> This project already contains typings files
 
 ## Usage
 
-```javascript
-import puppeteer from 'puppeteer'
-import $ from 'puppeteer-testkit'
-
-(async ()=>{
-    let browser = await puppeteer.launch()
-
-    // puppeteer-testkit would init with browser and set the default page to be the current page.
-    await $.setBrowser(await browser.pages())
-
-    const $body = $('body')
-
-    if(await $body.hasClass('some-class')){
-        const id = await $body.find('.item:eq(0)').attr('id')
-    }
-
-    ...
-})();
+```typescript
+import TableText from 'tabletext'
+const data: object[] = TableText.parse(`
+    // Support for parallel slash annotations
+    // The first line will be identified as keys
+    |  id   | gender |  age
+    |  1    |   1    |   16
+    |  2    |   0    |   24
+`)
+/* [
+    {id: '1', gender: '1', age: '16'},
+    {id: '2', gender: '0', age: '24'}
+]*/
 ```
 
-> Except some event trigger and some methods, most of DOM api are based on zeptojs, which would be injected when page on load.
+## Introduction
 
-[zepto.js Doc](https://zeptojs.com/)
+### TableText.parse(tableLikeString: string, decode?: boolean) : { [key: string]: string }[]
 
-What's different from `zepto.js` is that, `puppeteer-testkit` only supports getting data from dom but not setting data to dom or changing dom.
+- Parallel slash annotations is supported, which would be removed before parsing.
+- The first line would be identified as keys.
+- The first letter of the line is a delimiter, tell the parser how to split that line.
+- The delimiter should be a punctuations
+- When decode param was true, the keys and values would be decoded by `window.unescape`
 
-In chromium page, it was modified for `puppeteer-testkit` and exposes `$Z` namespace.
+```typescript
+TableText.parse(`   
+    #  id   # gender #  age
+    |  1    |   1    |   16
+    ,  2    ,   0    ,   24
+`)
+/* [
+    {id: '1', gender: '1', age: '16'},
+    {id: '2', gender: '0', age: '24'}
+] */
 
-## Methods return instance of VSelector
-
-`has`, `not`, `parents`, `parent`, `children`, `siblings`, `prev`, `next`, `find`, `eq`, `first`, `last`
-
-> jQuery CSS extensions is supported, such as \$('div:first') and el.is(':visible').
-
-```javascript
-const body: VSelector = $('body')
-const header: VSelector = body.find('header')
-const li1: VSelector = header.find('li').eq(1)
-const ul: VSelector = li1.parents('ul:visible')
+TableText.parse(`   
+    // decode
+    #  id   #  punctuation  
+    &  1    &   %26   
+    =  2    =   %3D     
+`, true)
+/* [
+    {id: '1', punctuation: '&' },
+    {id: '2', punctuation: '=' }
+] */
 ```
 
-The instance of VSelector do nothing with document
+### TableText.stringify(plainObjectArray: { [key: string]: string }[], encode?: boolean): string
 
-## Methods return Promise\<string | number | boolean | any\>
+ ```typescript
+TableText.stringify([
+    {id: '1', gender: '1', age: '16'},
+    {id: '2', gender: '0', age: '24'}
+])
+/* 
+    `,id,gender,age
+    ,1,1,16
+    ,2,0,24`
+ */
 
-`text`, `html`, `height`, `width`, `offset`, `offsetParent`, `position`, `val`, `index`, `scrollTop`, `css`, `attr`, `prop`, `data`, `is`, `hasClass`
-
-### All above methods can be used for test cases under `waitFor` and `expect`
-
-### `VSelector.waitFor.X(name?, expectedValue?, options?:{timeout: 1000, delay: 100}):Promise<void>`
-
-By default, it checks to be the expected value every 100ms and it would throw `TimeoutError` if failed to get the expected value after 1000ms
-
-```javascript
-await $('div.loading').waitFor.hasClass('hidden')
-await $('div.dialog').waitFor.css('display', 'block', {
-    timeout: 3000,
-    delay: 1000
-})
+TableText.stringify([
+    {id: '1', punctuation: '&' },
+    {id: '2', punctuation: '=' }
+], true)
+/*  
+    `,id,punctuation
+    ,1,%26
+    ,2,%3D
+*/
 ```
 
-### `VSelector.expect.X(name?, expectValue?):Promise<void>`
+### TableText.validate(tableLikeString: string, decode?: boolean): { valid: boolean; message?: string }
 
-It checks the value immediately, and throw `ExpectError` if failed to get the expected value
+ ```typescript
+ // false
+TextTable.validate(
+    `
+    #  id   #  gender #   age
+    的  1    的   1    的   16
+    ,  2    ,   0    ,   24
+    `
+) === false 
+TextTable.validate(` `) === false
+TextTable.validate(`
+    3
+    3
+`) === false
+TextTable.validate(`
+    , 3
 
-```javascript
-await $('div.loading').expect.hasClass('hidden')
-await $('div.dialog').expect.css('display', 'block')
+`) === false
+TextTable.validate(`, 3`) === false
+TextTable.validate(`
+    , 3
+    是 3
+`) === false
+TextTable.validate(`
+    , 3
+    a 3
+`) === false
+TextTable.validate(`
+    , 试试
+    , 3
+`) === false
+TextTable.validate(`
+    , ?
+    , 3
+`) === false
+TextTable.validate(`
+    , ?
+    , 3,,
+`) === false
 ```
 
-## Event Triggers
 
-All event triggers are based on api of puppeteer and do some functional packaging
-
-### `VSelector.click(options?): Promise<void>`
-
-Enhanced click function, supports continuous click for some expected result.
-
-#### options
-
-```javascript
-{
-    x: 10,   // click on element offset left
-    y: 10,   // click on element offset top
-
-    forShow?: string | forHidden?: string | forDispose?: string | forExist?: string | forTarget?: string | until?: () => true // checking options, selector or sub string of url or function
-    // should not be more than one of checking options
-
-    // the below options could work, only if had one of above checking options
-    timeout: 10000, // timeout
-    timespan: 1000, // time span between two click
-    delay: 100,  // delay of checking expected result after click
-    closeTarget: true  // work with forTarget, close target when the target is open
-}
-```
-
-### `VSelector.input(content: string, autoBlur: boolean = true): Promise<void>`
-
-1. clear the old value of element
-2. type the new value to the element
-3. blur the element by default
-
-### `VSelector.type(content: string): Promise<void>`
-
-VSelector.type == Puppeteer.Page.type
-
-### `VSelector.focus(): Promise<void>`
-
-VSelector.focus == Puppeteer.Page.focus
-
-### Some helpful tool methods
-
-`reload(options?: NavigationOptions): Promise<Response>`
-
-`findTarget(targetUrlSubstr: string): Promise<Target>`
-
-`closeTarget(targetUrlSubstr: string): Promise<Target>`
-
-`blur(): Promise<void>`
-
-`setBrowser(browser: Browser): Promise<void>`
-
-`setCurrentPage(page: Page): Promise<void>`
-
-`page: Page` // current page object
-
-`browser: Browser` // current browser object
-
-### Constants
-
-`UNDEFINED`, `NULL`, `EMPTY`, `NOT_EMPTY`
-
-```javascript
-await $('div.dialog').waitFor.attr('id', $.constants.NOT_EMPTY)
-```
-
----
-
----
-
-## `puppeteer-testkit` is being revised and updated periodically
-
-## Welcome to be a contributor to this project
-
----
-
----
-
-## License
-
-Licensed under MIT

@@ -1,5 +1,4 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
 
 // 没参数
 const props0 = [
@@ -37,9 +36,7 @@ export default () => {
         })
 
     Object.keys(props1).forEach((method) => {
-        it(`VSelector.waitFor.${method}(${
-            props1[method]
-        }, NOT_EMPTY)`, async () => {
+        it(`VSelector.waitFor.${method}(${props1[method]}, NOT_EMPTY)`, async () => {
             await $('#for-ppt-test').waitFor[method](
                 props1[method],
                 $.constants.NOT_EMPTY

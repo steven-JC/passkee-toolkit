@@ -1,5 +1,4 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
 import path from 'path'
 // 没参数
 const props0 = [

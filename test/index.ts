@@ -1,7 +1,7 @@
 // const utils = require('@/utils')
-import 'colors'
+require('colors')
+
 import puppeteer from 'puppeteer'
-import { TestKit } from '@/typings/TestKit'
 
 import TK from './TestKit'
 import $expect from './TestKit.expect'
@@ -10,19 +10,19 @@ import VSelector from './VSelector'
 import VSelectorExpect from './VSelector.expect'
 import VSelectorWaitFor from './VSelector.waitFor'
 
-const $: TestKit = require('../index')
+import $ from '../src'
 
 const time = Date.now()
 
 describe('puppeteer-testkit', () => {
     before(async () => {
-        let browser = await puppeteer.launch({
+        const browser = await puppeteer.launch({
             headless: false,
-            ////headless: true
+            //// headless: true
             devtools: true
         })
 
-        let page = (await browser.pages())[0]
+        const page = (await browser.pages())[0]
 
         await $.setBrowser(browser)
         $.setDebugMode(true)
@@ -128,7 +128,7 @@ describe('puppeteer-testkit', () => {
     })
     after(() => {
         console.log('All time cost ', Date.now() - time)
-        //$.browser.close()
+        // $.browser.close()
     })
     describe.only('TestKit', TK)
     describe('TestKit.expect', $expect)

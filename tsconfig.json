@@ -1,24 +1,29 @@
 {
     "compilerOptions": {
+        "rootDir": "src",
+        "baseUrl": "src",
+        "outDir": "tmp",
         "target": "es5",
         "module": "commonjs",
-        "strict": false,
-        "resolveJsonModule": true,
-        "esModuleInterop": true,
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+        "types": ["node", "mocha"],
+        "typeRoots": ["node_modules/@types", "typings"],
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "sourceMap": true,
         "moduleResolution": "node",
-        "noImplicitAny": false,
-        "importHelpers": false,
         "noUnusedLocals": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "allowJs": true,
-        "paths": {
-            "@/*": ["./*"]
-        },
-        "baseUrl": ".",
-        "types": ["node", "mocha"],
-        "typeRoots": ["node_modules/@types", "typings"],
-        "lib": ["esnext", "es2015", "dom", "dom.iterable", "scripthost"]
+        "esModuleInterop": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "declaration": true
     },
-    "include": ["./**/*.ts"]
+    "include": ["src/*"],
+    "exclude": ["node_modules", "tmp"]
 }

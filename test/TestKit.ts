@@ -1,54 +1,89 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
+
 declare var $Z
+
 export default () => {
-    it('mock ejs', async () => {
-        $.page.evaluate(() => {
-            $Z.ajax({
-                url: '/api/list/page/1?a=1&b=2',
-                type: 'post',
-                async: false,
-                success(data) {
-                    console.log(data)
-                }
-            })
+    it('mock ejs', () => {
+        return new Promise((r, rj) => {
+            $.page
+                .evaluate(() => {
+                    let res
+                    $Z.ajax({
+                        url: '/api/list/page/1?a=1&b=2',
+                        type: 'post',
+                        async: false,
+                        success(data) {
+                            res = data
+                        }
+                    })
+                    return res
+                })
+                .then((res) => {
+                    if (res.params.num === '1' && res.query.b === '2') {
+                        r()
+                    } else {
+                        rj()
+                    }
+                })
+            $.mock({ '/api/list/page/:num': 'ejs' })
         })
-        await $.mock({ '/api/list/page/:num': 'ejs' })
     })
     it('mock body null', async () => {
-        $.page.evaluate(() => {
-            $Z.ajax({
-                url: '/api/list?null',
-                type: 'post',
-                async: false,
-                success(data) {
-                    console.log(data)
-                }
-            })
+        return new Promise((r, rj) => {
+            $.page
+                .evaluate(() => {
+                    let res
+                    $Z.ajax({
+                        url: '/api/list?null',
+                        type: 'post',
+                        async: false,
+                        success(data) {
+                            res = data
+                        }
+                    })
+                    return res
+                })
+                .then((res) => {
+                    if (!res) {
+                        r()
+                    } else {
+                        rj()
+                    }
+                })
+            $.mock({ '/api/list': 'body-null' })
         })
-        await $.mock({ '/api/list': 'body-null' })
     })
-    it('mock list', async () => {
-        $.page.evaluate(() => {
+    it('mock get', async () => {
+        $.mock({ '/api/list': '0' })
+        const res = await $.page.evaluate(() => {
+            let res
             $Z.ajax({
                 url: '/api/list?0',
                 type: 'post',
                 async: false,
                 success(data) {
                     console.log(data)
+                    res = data
                 }
             })
+            return res
         })
-        await $.mock({ '/api/list': '0' })
+        console.log(res)
+        if (res.code !== 0) {
+            throw new Error('Error')
+        }
+
+        await $.delay(1000)
     })
 
-    it('mock list*2', async () => {
+    it('mock request blocking test', async () => {
         $.mock({ '/api/list': '0' })
-        await $.page.evaluate(() => {
+        const res = await $.page.evaluate(() => {
             let res
             $Z.ajax({
                 url: 'https://registry.npm.taobao.org/passkee',
                 async: false,
+                method: 'post',
                 success(data) {
                     res = data.id
                 }
@@ -56,36 +91,41 @@ export default () => {
             $Z.ajax({
                 url: '/api/list?1',
                 data: res,
+                async: false,
                 type: 'post',
                 success(data) {
                     console.log(data)
+                    res = data
                 }
             })
+            return res
         })
+        if (res.code !== 0) {
+            throw new Error('[Error] mock request blocking test ')
+        }
         await $.delay(1000)
     })
 
     it('mock list detail', async () => {
-        $.mock({ '/api/list': '0', '/api/detail1': 'all' })
+        $.mock({ '/api/list': '0', '/api/detail11': 'all' })
         await $.page.evaluate(() => {
             $Z.ajax({
-                url: '/api/detail1',
+                url: '/api/detail11',
                 success(data) {
                     console.log(data)
                 }
             })
 
             $Z.ajax({
-                url: '/api/list?2',
+                url: '/api/list',
                 success(data) {
                     console.log(data)
                 }
             })
         })
-        await $.delay(1000)
     })
 
-    it('mock list detail * 3 sync', async () => {
+    it.skip('mock list detail * 3 sync', async () => {
         $.mock({
             '/api/list': '0',
             '/api/detail1': 'all',
@@ -116,7 +156,7 @@ export default () => {
             })
 
             $Z.ajax({
-                url: '/api/list?2',
+                url: '/api/list',
                 success(data) {
                     console.log(data)
                 }

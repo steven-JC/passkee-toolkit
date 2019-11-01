@@ -1,5 +1,4 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
 
 // 没参数
 const props0 = [
@@ -32,16 +31,15 @@ export default () => {
         .filter((item) => ['val'].indexOf(item) === -1)
         .forEach((method) => {
             it(`VSelector.expect.${method}(NOT_EMPTY)`, async () => {
-                if (method === 'visible')
+                if (method === 'visible') {
                     console.log($('#for-ppt-test').expect[method])
+                }
                 await $('#for-ppt-test').expect[method]($.constants.NOT_EMPTY)
             })
         })
 
     Object.keys(props1).forEach((method) => {
-        it(`VSelector.expect.${method}(${
-            props1[method]
-        }, NOT_EMPTY)`, async () => {
+        it(`VSelector.expect.${method}(${props1[method]}, NOT_EMPTY)`, async () => {
             await $('#for-ppt-test').expect[method](
                 props1[method],
                 $.constants.NOT_EMPTY
