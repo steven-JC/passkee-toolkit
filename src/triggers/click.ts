@@ -1,6 +1,5 @@
 declare const global: any
 
-import constants from '../constants'
 import state from '../utils/state'
 
 export default async (
@@ -41,7 +40,7 @@ export default async (
     })
     await global.page.waitFor(100)
     await global.page.mouse.click(x, y, {
-        button: constants.MouseButton[button] || 'left'
+        button: button || 'left'
     })
     state.lastPos = { x, y }
 }

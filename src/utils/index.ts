@@ -1,8 +1,14 @@
 import ExpectError from './ExpectError'
-import constants from '../constants'
 import qs from 'qs'
 import * as url from 'url'
 import SpinnerLog from './SpinnerLog'
+
+export const compareConst = {
+    UNDEFINED: 'UNDEFINED',
+    NULL: 'NULL',
+    EMPTY: 'EMPTY', // 空串
+    NOT_EMPTY: 'NOT_EMPTY'
+}
 
 declare const global: any
 declare const $Z: any
@@ -226,17 +232,17 @@ const utils = {
             throw new Error('target is required')
         }
         switch (target) {
-            case constants.CompareVars.UNDEFINED:
+            case compareConst.UNDEFINED:
                 return typeof value === 'undefined'
-            case constants.CompareVars.NULL:
+            case compareConst.NULL:
                 return value === null
-            case constants.CompareVars.EMPTY:
+            case compareConst.EMPTY:
                 return (
                     typeof value === 'undefined' &&
                     value === null &&
                     value === ''
                 )
-            case constants.CompareVars.NOT_EMPTY:
+            case compareConst.NOT_EMPTY:
                 return (
                     typeof value !== 'undefined' &&
                     value !== null &&

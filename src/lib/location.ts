@@ -1,5 +1,12 @@
 import utils from '../utils'
 declare const global: any
+
+export default async (): Promise<LocationObject> => {
+    const href = await global.page.evaluate(() => {
+        return location.href
+    })
+    return utils.parseUrl(href, href)
+}
 export interface LocationObject {
     protocol: string | null
     host: string | null
@@ -12,11 +19,4 @@ export interface LocationObject {
     path: string | null
     href: string | null
     hashQuery: { [key: string]: string }
-}
-
-export default async (): Promise<LocationObject> => {
-    const href = await global.page.evaluate(() => {
-        return location.href
-    })
-    return utils.parseUrl(href, href)
 }

@@ -5,9 +5,7 @@ import mousemove from './triggers/mouseMove'
 import blur from './triggers/blur'
 import input from './triggers/input'
 import utils from './utils'
-import screenshot from './screenshot'
-
-import constants from './constants'
+import screenshot from './lib/screenshot'
 
 declare const global: any
 declare const $Z: any
@@ -188,7 +186,7 @@ class VSelector {
                 }
             }
             if (trigger !== 'mouseMove') {
-                Object.keys(constants.MouseButton).forEach((btn) => {
+                ;['left', 'middle', 'right'].forEach((btn) => {
                     mouseTriggers[trigger][btn] = async (offset) => {
                         const spinner = utils.log(`${trigger} ${btn}`, {
                             selectors: this.selectors

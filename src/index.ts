@@ -1,12 +1,11 @@
 import 'colors'
 import * as path from 'path'
-import utils from './utils'
-import constants from './constants'
+import utils, { compareConst } from './utils'
 import VSelector, { PlainObject } from './VSelector'
-import expects from './bom/expects'
-import waitFors from './bom/waitFors'
-import location from './bom/location'
-import mock from './mock'
+import expects from './lib/expects'
+import waitFors from './lib/waitFors'
+import location from './lib/location'
+import mock from './lib/mock'
 import { Page, Browser, NavigationOptions } from 'puppeteer'
 declare const global: any
 
@@ -23,7 +22,7 @@ function TestKit(selector) {
     return new VSelector(selector)
 }
 
-TestKit.constants = constants.CompareVars
+TestKit.constants = compareConst
 TestKit.browser
 TestKit.page
 

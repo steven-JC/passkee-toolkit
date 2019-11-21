@@ -3,15 +3,6 @@ import qs from 'qs'
 import expects from './expects'
 declare const global: any
 
-export interface WaitForOptions {
-    timeout?: number
-    delay?: number
-}
-
-export interface TimeoutOption {
-    timeout: number
-}
-
 export default {
     title: async (title, options?: WaitForOptions) => {
         const spinner = utils.log(`wait for title to be ${title}`)
@@ -158,3 +149,12 @@ function parseDataString(data) {
 //         return data.toString()
 //     }
 // }
+
+export interface WaitForOptions {
+    timeout?: number
+    delay?: number
+}
+
+export interface TimeoutOption {
+    timeout: number
+}
