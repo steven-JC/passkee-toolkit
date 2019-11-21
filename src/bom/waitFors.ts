@@ -2,8 +2,18 @@ import utils from '../utils'
 import qs from 'qs'
 import expects from './expects'
 declare const global: any
+
+export interface WaitForOptions {
+    timeout?: number
+    delay?: number
+}
+
+export interface TimeoutOption {
+    timeout: number
+}
+
 export default {
-    title: async (title, options?) => {
+    title: async (title, options?: WaitForOptions) => {
         const spinner = utils.log(`wait for title to be ${title}`)
         await utils
             .waitFor(
@@ -20,7 +30,7 @@ export default {
                 spinner.fail(e)
             })
     },
-    target: async (targetUrlSubstr, options?) => {
+    target: async (targetUrlSubstr, options?: WaitForOptions) => {
         const spinner = utils.log(`wait for target exist, ${targetUrlSubstr}`)
         await utils
             .waitFor(
@@ -38,7 +48,7 @@ export default {
             })
     },
 
-    location: async (urlOrPathOrHash, options?) => {
+    location: async (urlOrPathOrHash, options?: WaitForOptions) => {
         const spinner = utils.log(`wait for location to be ${urlOrPathOrHash}`)
         await utils
             .waitFor(
@@ -56,7 +66,7 @@ export default {
             })
     },
 
-    request: async (urlOrPath, postData?, options?) => {
+    request: async (urlOrPath, postData?, options?: TimeoutOption) => {
         const spinner = utils.log(`wait for request, ${urlOrPath}`)
         let data
         try {
@@ -94,7 +104,7 @@ export default {
         }
     },
 
-    response: async (urlOrPath, options?) => {
+    response: async (urlOrPath, options?: TimeoutOption) => {
         const spinner = utils.log(`wait for response 200, ${urlOrPath}`)
         try {
             await global.page.waitForResponse((response) => {
@@ -111,7 +121,7 @@ export default {
         }
     },
 
-    fn: async (cb, options?) => {
+    fn: async (cb, options?: WaitForOptions) => {
         const spinner = utils.log(`wait for fn to return true`)
         await utils
             .waitFor(

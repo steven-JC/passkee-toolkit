@@ -12,7 +12,25 @@ import constants from './constants'
 declare const global: any
 declare const $Z: any
 
-const mTriggers = {
+// 没参数
+const noParamProps = [
+    'text',
+    'html',
+    'height',
+    'width',
+    'offset',
+    'offsetParent',
+    'position',
+    'val',
+    'index',
+    'scrollTop'
+]
+// 有参数
+const oneParamProps = ['css', 'attr', 'prop', 'data', 'hasClass']
+// 选择器
+const selectors = ['filter', 'parents', 'parent', 'children', 'find', 'eq']
+
+const MouseTrigger = {
     click,
     mousedown,
     mouseup,
@@ -23,15 +41,15 @@ function $(selector) {
     return new VSelector(selector)
 }
 
-export default class VSelector {
+class VSelector {
     public selectors: any = null
     public domSelector: string = ''
-    public expect
-    public waitFor
+    public expect: DomExpect
+    public waitFor: DomWaitFor
     public click: IMouseTrigger
     public mousedown: IMouseTrigger
     public mouseup: IMouseTrigger
-    public mousemove: (offset?) => {}
+    public mousemove: (offset?: Offset) => Promise<void>
     constructor(selector) {
         if (selector instanceof Array) {
             this.selectors = JSON.parse(JSON.stringify(selector))
@@ -44,7 +62,7 @@ export default class VSelector {
         const waitFors = {}
         const expects = {}
 
-        props0.forEach((item) => {
+        noParamProps.forEach((item) => {
             waitFors[item] = async (value, options) => {
                 const spinner = utils.log(`wait for ${item} to be ${value}`, {
                     selectors: this.selectors
@@ -65,7 +83,7 @@ export default class VSelector {
             }
         })
 
-        props1.forEach((item) => {
+        oneParamProps.forEach((item) => {
             waitFors[item] = async (name, value, options) => {
                 const spinner = utils.log(
                     `wait for ${item} ${name} to be ${value}`,
@@ -116,7 +134,7 @@ export default class VSelector {
             }
         })
 
-        props0.forEach((item) => {
+        noParamProps.forEach((item) => {
             expects[item] = async (value) => {
                 const spinner = utils.log(`expect ${item} to be ${value}`, {
                     selectors: this.selectors
@@ -129,7 +147,7 @@ export default class VSelector {
             }
         })
 
-        props1.forEach((item) => {
+        oneParamProps.forEach((item) => {
             expects[item] = async (name, value) => {
                 const spinner = utils.log(
                     `expect ${item} ${name} to be ${value}`,
@@ -147,7 +165,7 @@ export default class VSelector {
 
         const mouseTriggers = {}
 
-        Object.keys(mTriggers).forEach((trigger) => {
+        Object.keys(MouseTrigger).forEach((trigger) => {
             mouseTriggers[trigger] = async (offset) => {
                 const spinner = utils.log(`${trigger}`, {
                     selectors: this.selectors
@@ -159,7 +177,7 @@ export default class VSelector {
                             { type: 'eq', params: [0] }
                         ])
                     )
-                    await mTriggers[trigger].call(
+                    await mouseTriggers[trigger].call(
                         this,
                         this.domSelector,
                         offset
@@ -182,7 +200,7 @@ export default class VSelector {
                                     { type: 'eq', params: [0] }
                                 ])
                             )
-                            await mTriggers[trigger].call(
+                            await mouseTriggers[trigger].call(
                                 this,
                                 this.domSelector,
                                 offset,
@@ -395,23 +413,6 @@ export default class VSelector {
     async press() {}
     */
 }
-// 没参数
-const props0 = [
-    'text',
-    'html',
-    'height',
-    'width',
-    'offset',
-    'offsetParent',
-    'position',
-    'val',
-    'index',
-    'scrollTop'
-]
-// 有参数
-const props1 = ['css', 'attr', 'prop', 'data', 'is', 'hasClass']
-// 选择器
-const selectors = ['filter', 'parents', 'parent', 'children', 'find', 'eq']
 
 // 选择器
 selectors.forEach((item) => {
@@ -425,7 +426,7 @@ selectors.forEach((item) => {
 })
 
 // 无参数
-props0.forEach((it) => {
+noParamProps.forEach((it) => {
     VSelector.prototype[it] = async function(silent) {
         const spinner = silent
             ? null
@@ -452,7 +453,7 @@ props0.forEach((it) => {
 })
 
 // 一个参数
-props1.forEach((it) => {
+oneParamProps.forEach((it) => {
     VSelector.prototype[it] = async function(param, silent) {
         const spinner = silent
             ? null
@@ -478,10 +479,126 @@ props1.forEach((it) => {
         }
     }
 })
+interface VSelector {
+    text(): Promise<string>
+    html(): Promise<string>
+    height(): Promise<number>
+    width(): Promise<number>
+    val(): Promise<string>
+    index(): Promise<number>
+    offset(): Promise<{
+        top: number
+        left: number
+        width: number
+        heigh: number
+    }>
+    offsetParent(): Promise<{
+        top: number
+        left: number
+        width: number
+        heigh: number
+    }>
+    position(): Promise<{ top: number; left: number }>
+    scrollTop(): Promise<number>
 
+    css(name: string): Promise<string>
+    attr(attrname: string): Promise<any>
+    prop(name: string): Promise<any>
+    data(name: string): Promise<any>
+    hasClass(name: string): Promise<boolean>
+
+    filter(selector?: string): VSelector
+    parents(selector?: string): VSelector
+    parent(selector?: string): VSelector
+    children(selector?: string): VSelector
+    find(selector: string): VSelector
+    eq(index: number): VSelector
+
+    first(): VSelector
+    last(): VSelector
+}
 interface IMouseTrigger {
     (offset?): Promise<any>
     left(offset?): Promise<any>
     middle(offset?): Promise<any>
     right(offset?): Promise<any>
 }
+interface DomWaitFor {
+    text(value: string | symbol, options?: WaitForOptions): Promise<void>
+    html(value: string | symbol, options?: WaitForOptions): Promise<void>
+    height(value: string | symbol, options?: WaitForOptions): Promise<void>
+    width(value: number | symbol, options?: WaitForOptions): Promise<void>
+    val(value: string | symbol, options?: WaitForOptions): Promise<void>
+    index(value: number | symbol, options?: WaitForOptions): Promise<void>
+
+    visible(value: boolean, options?: WaitForOptions): Promise<void>
+    length(value: number, options?: WaitForOptions): Promise<void>
+
+    scrollTop(value: number | symbol, options?: WaitForOptions): Promise<void>
+
+    css(
+        name: string | symbol,
+        value: string,
+        options?: WaitForOptions
+    ): Promise<void>
+    attr(
+        name: string | symbol,
+        value: string,
+        options?: WaitForOptions
+    ): Promise<void>
+    prop(
+        name: string | symbol,
+        value: string,
+        options?: WaitForOptions
+    ): Promise<void>
+    data(
+        name: string | symbol,
+        value: string,
+        options?: WaitForOptions
+    ): Promise<void>
+
+    hasClass(name: string, value: boolean): Promise<void>
+}
+
+interface DomExpect {
+    text(value: string | symbol): Promise<void>
+    html(value: string | symbol): Promise<void>
+    height(value: string | symbol): Promise<void>
+    width(value: number | symbol): Promise<void>
+    val(value: string | symbol): Promise<void>
+    index(value: number | symbol): Promise<void>
+
+    visible(value: boolean): Promise<void>
+    length(value: number): Promise<void>
+
+    scrollTop(value: number | symbol): Promise<void>
+
+    css(name: string | symbol, value: string): Promise<void>
+    attr(name: string | symbol, value: string): Promise<void>
+    prop(name: string | symbol, value: string): Promise<void>
+    data(name: string | symbol, value: string): Promise<void>
+    hasClass(name: string | symbol, value: boolean): Promise<void>
+}
+
+export interface Offset {
+    x?: number
+    y?: number
+}
+
+export interface PlainObject {
+    [key: string]: any
+}
+
+export interface WaitForOptions {
+    timeout?: number
+    delay?: number
+}
+
+export interface MouseTrigger {
+    (offset?: Offset): Promise<void>
+    left(offset?: Offset): Promise<void>
+    middle(offset?: Offset): Promise<void>
+    right(offset?: Offset): Promise<void>
+}
+
+export default VSelector

@@ -2,12 +2,12 @@ import 'colors'
 import * as path from 'path'
 import utils from './utils'
 import constants from './constants'
-import VSelector from './VSelector'
+import VSelector, { PlainObject } from './VSelector'
 import expects from './bom/expects'
 import waitFors from './bom/waitFors'
 import location from './bom/location'
 import mock from './mock'
-
+import { Page, Browser, NavigationOptions } from 'puppeteer'
 declare const global: any
 
 global.browser = null
@@ -24,8 +24,10 @@ function TestKit(selector) {
 }
 
 TestKit.constants = constants.CompareVars
-TestKit.browser = null
-TestKit.setBrowser = async (b) => {
+TestKit.browser
+TestKit.page
+
+TestKit.setBrowser = async (b: Browser) => {
     global.browser = TestKit.browser = b
 
     await TestKit.setCurrentPage((await global.browser.pages())[0])
@@ -39,28 +41,33 @@ TestKit.setBrowser = async (b) => {
     })
 }
 
-TestKit.page = null
-TestKit.setCurrentPage = async (p) => {
+TestKit.setCurrentPage = async (p: Page) => {
     global.page = TestKit.page = p
 }
 
-TestKit.setDebugMode = (yes) => {
+TestKit.setDebugMode = (yes: boolean) => {
     utils.debugMode = yes
 }
 
-TestKit.setScreenshotFolder = (folderPath) => {
+TestKit.setScreenshotFolder = (folderPath: string) => {
     utils.screenshotSaveFolder = folderPath
 }
 
-TestKit.setMockDataFolder = (folderPath) => {
+TestKit.setMockDataFolder = (folderPath: string) => {
     utils.mockDataFolder = folderPath
 }
 
-TestKit.setMockOptions = (options) => {
+TestKit.setMockOptions = (options: {
+    timeout: number
+    headers: PlainObject
+}) => {
     utils.mockOptions = Object.assign({ timeout: 2000, headers: {} }, options)
 }
 
-TestKit.mock = (maps, options?) => {
+TestKit.mock = (
+    maps: { [path: string]: string },
+    options?: { timeout?: number; headers?: { [key: string]: string } }
+) => {
     const spinner = utils.log(`mocking for request`, { mockMaps: maps })
     return mock(maps, options)
         .then(() => {
@@ -71,7 +78,7 @@ TestKit.mock = (maps, options?) => {
         })
 }
 
-function initPage(p?) {
+function initPage(p?: Page) {
     // TODO: 可能会比较慢，导致 $Z undifined，需要一个机制去告知用例执行时机
     ;(p ? p : global.page).on('console', (msg) => {
         const jsh = msg.args()
@@ -89,13 +96,12 @@ function initPage(p?) {
     })
 }
 
-TestKit.reload = async (opts?) => {
+TestKit.reload = async (opts?: NavigationOptions) => {
     const spinner = utils.log(`reload page`)
     try {
-        const res = await TestKit.page.reload(opts)
+        await TestKit.page.reload(opts)
         await global.page.waitForFunction('window.$Z')
         spinner.succeed()
-        return res
     } catch (e) {
         spinner.fail(e)
     }
@@ -134,5 +140,8 @@ TestKit.expect = expects
 // utils.defineFreezedProps(TestKit, { waitFor: waitFors, expect: expects })
 
 // Object.freeze(TestKit.waitFor)
-
+module TestKit {
+    export let browser: Browser
+    export let page: Page
+}
 export default TestKit
