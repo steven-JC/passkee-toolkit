@@ -1,14 +1,19 @@
 /***
  *  让元素失去焦点
  * */
-declare const global: any
+import state from '../utils/state'
 
 export default async (selector, offsetY?) => {
-    const el = await global.page.$(selector)
-    const box = await el.boundingBox()
-
+    const el = await state.currentPage.$(selector)
+    let box
+    if (el) {
+        box = await el.boundingBox()
+    }
     if (!el || !box) {
         throw '[puppeteer-testkit] element not visible or deleted fro document'
     }
-    await global.page.mouse.click(box.x + box.width / 2, box.y - (offsetY || 2))
+    await state.currentPage.mouse.click(
+        box.x + box.width / 2,
+        box.y - (offsetY || 2)
+    )
 }

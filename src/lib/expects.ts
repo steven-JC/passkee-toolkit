@@ -1,14 +1,14 @@
 import target from './target'
 import location from './location'
 import utils from '../utils'
-declare const global: any
+import state from '../utils/state'
 
 export default {
     title: async (title, silent?) => {
         const spinner: any = silent
             ? null
             : utils.log(`expect title to be ${title}`)
-        const titl = await global.page.title()
+        const titl = await state.currentPage.title()
         if (title !== titl) {
             if (!silent) {
                 spinner.fail()

@@ -1,5 +1,4 @@
 import state from '../utils/state'
-declare const global: any
 export default async (
     selector,
     offset: {
@@ -16,8 +15,11 @@ export default async (
         },
         offset
     )
-    const el = await global.page.$(selector)
-    const box = await el.boundingBox()
+    const el = await state.currentPage.$(selector)
+    let box
+    if (el) {
+        box = await el.boundingBox()
+    }
 
     if (!el || !box) {
         if (!offset.forDispose && !offset.forHidden) {
@@ -31,11 +33,12 @@ export default async (
     const y = box.y + (offset.y ? offset.y : box.height / 2)
     const steps = Math.ceil(
         Math.sqrt(
-            Math.pow(x - state.lastPos.x, 2) + Math.pow(y - state.lastPos.y, 2)
+            Math.pow(x - state.lastMousePosition.x, 2) +
+                Math.pow(y - state.lastMousePosition.y, 2)
         ) / 5
     )
-    await global.page.mouse.move(x, y, {
+    await state.currentPage.mouse.move(x, y, {
         steps
     })
-    state.lastPos = { x, y }
+    state.lastMousePosition = { x, y }
 }

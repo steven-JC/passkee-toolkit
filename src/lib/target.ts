@@ -1,12 +1,12 @@
 import utils from '../utils'
 
-declare const global: any
+import state from '../utils/state'
 
 export default {
     async findTarget(urlSubstr, silent?) {
         const spinner = silent ? null : utils.log(`find target ${urlSubstr}`)
 
-        const targets = await global.browser.targets()
+        const targets = await state.currentBrowser.targets()
         const res = targets.find(
             (it) => (it.url() || '').indexOf(urlSubstr) > -1
         )

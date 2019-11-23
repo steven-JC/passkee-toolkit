@@ -8,7 +8,6 @@ const props0 = [
     'width',
     'offset',
     'offsetParent',
-    'position',
     'val',
     'index',
     'scrollTop',
@@ -21,7 +20,6 @@ const props1 = {
     attr: 'attr',
     prop: 'nodeName',
     data: 'data',
-    is: 'div',
     hasClass: 'for-ppt-test'
 }
 

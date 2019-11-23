@@ -3,22 +3,22 @@ import fs from 'fs-extra'
 import path from 'path'
 import ejs from 'ejs'
 import UrlPattern from 'url-pattern'
-
-declare const global: any
+import state from '../utils/state'
+import config from '../utils/config'
 
 let mocking = 0
 let errors: string[] = []
 
 export default async (maps, options?) => {
     mocking++
-    await global.page.setRequestInterception(true)
+    await state.currentPage.setRequestInterception(true)
     const routes = Object.keys(maps)
 
-    options = Object.assign({}, utils.mockOptions, options)
+    options = Object.assign({}, config.mockOptions, options)
 
     const promises: any[] = routes.map((route) => {
         let handled: boolean = false
-        return global.page.waitForRequest(
+        return state.currentPage.waitForRequest(
             (request: any): any => {
                 if (!handled) {
                     const urlParsed: any = utils.parseUrl(request.url())
@@ -35,7 +35,7 @@ export default async (maps, options?) => {
                     if (fileName) {
                         handled = true
                         const filePath = path.join(
-                            utils.mockDataFolder,
+                            config.mockDataFolder,
                             `${fileName}.ejs`
                         )
                         if (!fs.existsSync(filePath)) {
@@ -126,7 +126,7 @@ export default async (maps, options?) => {
 
     mocking--
     if (!mocking) {
-        await global.page.setRequestInterception(false)
+        await state.currentPage.setRequestInterception(false)
     }
 
     if (errors.length) {

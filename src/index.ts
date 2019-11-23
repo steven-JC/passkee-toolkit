@@ -1,19 +1,14 @@
 import 'colors'
 import * as path from 'path'
 import utils, { compareConst } from './utils'
-import VSelector, { PlainObject } from './VSelector'
+import config, { IConfigParams } from './utils/config'
+import VSelector from './VSelector'
 import expects from './lib/expects'
 import waitFors from './lib/waitFors'
 import location from './lib/location'
 import mock from './lib/mock'
 import { Page, Browser, NavigationOptions } from 'puppeteer'
-declare const global: any
-
-global.browser = null
-global.page = null
-
-utils.screenshotSaveFolder = path.join(process.cwd(), 'screenshot')
-utils.mockDataFolder = path.join(process.cwd(), 'mock')
+import state from './utils/state'
 
 function TestKit(selector) {
     if (!selector) {
@@ -22,18 +17,35 @@ function TestKit(selector) {
     return new VSelector(selector)
 }
 
+Object.defineProperties(TestKit, {
+    browser: {
+        get(): Browser {
+            return state.currentBrowser
+        }
+    },
+    page: {
+        get(): Page {
+            return state.currentPage
+        }
+    }
+})
+
+// tslint:disable-next-line:no-namespace
+namespace TestKit {
+    export let browser: Browser
+    export let page: Page
+}
+
 TestKit.constants = compareConst
-TestKit.browser
-TestKit.page
 
 TestKit.setBrowser = async (b: Browser) => {
-    global.browser = TestKit.browser = b
+    state.currentBrowser = b
 
-    await TestKit.setCurrentPage((await global.browser.pages())[0])
+    await TestKit.setCurrentPage((await state.currentBrowser.pages())[0])
 
     initPage()
 
-    global.browser.on('targetcreated', (target) => {
+    state.currentBrowser.on('targetcreated', (target) => {
         ;(async () => {
             await initPage(await target.page())
         })()
@@ -41,26 +53,11 @@ TestKit.setBrowser = async (b: Browser) => {
 }
 
 TestKit.setCurrentPage = async (p: Page) => {
-    global.page = TestKit.page = p
+    state.currentPage = p
 }
 
-TestKit.setDebugMode = (yes: boolean) => {
-    utils.debugMode = yes
-}
-
-TestKit.setScreenshotFolder = (folderPath: string) => {
-    utils.screenshotSaveFolder = folderPath
-}
-
-TestKit.setMockDataFolder = (folderPath: string) => {
-    utils.mockDataFolder = folderPath
-}
-
-TestKit.setMockOptions = (options: {
-    timeout: number
-    headers: PlainObject
-}) => {
-    utils.mockOptions = Object.assign({ timeout: 2000, headers: {} }, options)
+TestKit.config = (cfg: IConfigParams) => {
+    config.setConfig(cfg)
 }
 
 TestKit.mock = (
@@ -79,7 +76,7 @@ TestKit.mock = (
 
 function initPage(p?: Page) {
     // TODO: 可能会比较慢，导致 $Z undifined，需要一个机制去告知用例执行时机
-    ;(p ? p : global.page).on('console', (msg) => {
+    ;(p ? p : state.currentPage).on('console', (msg) => {
         const jsh = msg.args()
         for (const x of jsh) {
             const text = x.toString().replace(/JSHandle\:/g, '')
@@ -88,8 +85,8 @@ function initPage(p?: Page) {
             }
         }
     })
-    ;(p ? p : global.page).on('load', async (response) => {
-        await global.page.addScriptTag({
+    ;(p ? p : state.currentPage).on('load', async (response) => {
+        await state.currentPage.addScriptTag({
             path: path.join(__dirname, '../browser/$Z.js')
         })
     })
@@ -98,8 +95,8 @@ function initPage(p?: Page) {
 TestKit.reload = async (opts?: NavigationOptions) => {
     const spinner = utils.log(`reload page`)
     try {
-        await TestKit.page.reload(opts)
-        await global.page.waitForFunction('window.$Z')
+        await state.currentPage.reload(opts)
+        await state.currentPage.waitForFunction('window.$Z')
         spinner.succeed()
     } catch (e) {
         spinner.fail(e)
@@ -108,7 +105,7 @@ TestKit.reload = async (opts?: NavigationOptions) => {
 
 TestKit.title = async () => {
     const spinner = utils.log(`get page title`)
-    const res = await global.page.title()
+    const res = await state.currentPage.title()
     if (res) {
         spinner.succeed(res)
     } else {
@@ -136,11 +133,4 @@ TestKit.delay = (ms?) => {
 TestKit.waitFor = waitFors
 TestKit.expect = expects
 
-// utils.defineFreezedProps(TestKit, { waitFor: waitFors, expect: expects })
-
-// Object.freeze(TestKit.waitFor)
-module TestKit {
-    export let browser: Browser
-    export let page: Page
-}
 export default TestKit

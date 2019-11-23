@@ -1,8 +1,8 @@
 import utils from '../utils'
-declare const global: any
+import state from '../utils/state'
 
 export default async (): Promise<LocationObject> => {
-    const href = await global.page.evaluate(() => {
+    const href = await state.currentPage.evaluate(() => {
         return location.href
     })
     return utils.parseUrl(href, href)

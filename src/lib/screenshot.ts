@@ -1,13 +1,12 @@
-import utils from '../utils'
 import path from 'path'
 import fs from 'fs-extra'
 import BlinkDiff from 'blink-diff'
-
-declare const global: any
+import state from '../utils/state'
+import config from '../utils/config'
 declare const $Z: any
 
 export default async (selector, name) => {
-    const offset = await global.page.evaluate((selector) => {
+    const offset = await state.currentPage.evaluate((selector) => {
         return $Z(selector).offset()
     }, selector)
 
@@ -18,7 +17,7 @@ export default async (selector, name) => {
         )
     }
 
-    const image = await global.page.screenshot({
+    const image = await state.currentPage.screenshot({
         // document坐标
         clip: {
             x: offset.left,
@@ -29,7 +28,7 @@ export default async (selector, name) => {
         encoding: 'binary' // base64 binary
     })
 
-    if (!fs.existsSync(path.join(utils.screenshotSaveFolder, 'A', name))) {
+    if (!fs.existsSync(path.join(config.screenshotFolder, 'A', name))) {
         saveTo(name, 'A', image)
     } else {
         saveTo(name, 'B', image)
@@ -38,17 +37,17 @@ export default async (selector, name) => {
         if (!res.passed) {
             throw new Error(
                 `To much differences between the two screenshots, [${path.join(
-                    utils.screenshotSaveFolder,
+                    config.screenshotFolder,
                     'A',
                     name
                 ) +
                     '] & [' +
                     path.join(
-                        utils.screenshotSaveFolder,
+                        config.screenshotFolder,
                         'B',
                         name
                     )}], the differences you can find out in [${path.join(
-                    utils.screenshotSaveFolder,
+                    config.screenshotFolder,
                     'output',
                     name
                 )}]`
@@ -58,9 +57,9 @@ export default async (selector, name) => {
 }
 
 function diff(name) {
-    const AImage = path.join(utils.screenshotSaveFolder, 'A', name)
-    const BImage = path.join(utils.screenshotSaveFolder, 'B', name)
-    const OImage = path.join(utils.screenshotSaveFolder, 'output', name)
+    const AImage = path.join(config.screenshotFolder, 'A', name)
+    const BImage = path.join(config.screenshotFolder, 'B', name)
+    const OImage = path.join(config.screenshotFolder, 'output', name)
 
     return new Promise((r, rj) => {
         const bdiff = new BlinkDiff({
@@ -92,7 +91,7 @@ function diff(name) {
 }
 
 function saveTo(name, target, image) {
-    const folder = path.join(utils.screenshotSaveFolder, target)
+    const folder = path.join(config.screenshotFolder, target)
     if (!fs.existsSync(folder)) {
         fs.mkdirpSync(folder)
     }

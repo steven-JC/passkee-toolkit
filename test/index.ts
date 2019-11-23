@@ -17,15 +17,15 @@ const time = Date.now()
 describe('puppeteer-testkit', () => {
     before(async () => {
         const browser = await puppeteer.launch({
-            headless: false,
-            //// headless: true
+            //// headless: false,
+            headless: true,
             devtools: true
         })
 
         const page = (await browser.pages())[0]
 
         await $.setBrowser(browser)
-        $.setDebugMode(true)
+        $.config({ debugMode: true })
 
         await page.setViewport({
             width: 1366,
@@ -130,7 +130,7 @@ describe('puppeteer-testkit', () => {
         console.log('All time cost ', Date.now() - time)
         // $.browser.close()
     })
-    describe.only('TestKit', TK)
+    describe('TestKit', TK)
     describe('TestKit.expect', $expect)
     describe('TestKit.waitFor', $waitFor)
     describe('VSelector', VSelector)

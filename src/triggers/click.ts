@@ -1,5 +1,3 @@
-declare const global: any
-
 import state from '../utils/state'
 
 export default async (
@@ -19,10 +17,13 @@ export default async (
         },
         offset
     )
-    await global.page.waitForSelector(selector)
-    const el = await global.page.$(selector)
-    await el.focus()
-    const box = await el.boundingBox()
+    await state.currentPage.waitForSelector(selector)
+    const el = await state.currentPage.$(selector)
+    let box
+    if (el) {
+        await el.focus()
+        box = await el.boundingBox()
+    }
 
     if (!el || !box) {
         if (!offset.forDispose && !offset.forHidden) {
@@ -35,12 +36,12 @@ export default async (
     const x = box.x + (offset.x ? offset.x : box.width / 2)
     const y = box.y + (offset.y ? offset.y : box.height / 2)
 
-    await global.page.mouse.move(x, y, {
+    await state.currentPage.mouse.move(x, y, {
         steps: 10
     })
-    await global.page.waitFor(100)
-    await global.page.mouse.click(x, y, {
+    await state.currentPage.waitFor(100)
+    await state.currentPage.mouse.click(x, y, {
         button: button || 'left'
     })
-    state.lastPos = { x, y }
+    state.lastMousePosition = { x, y }
 }

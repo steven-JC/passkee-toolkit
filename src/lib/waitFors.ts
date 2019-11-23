@@ -1,7 +1,7 @@
 import utils from '../utils'
 import qs from 'qs'
 import expects from './expects'
-declare const global: any
+import state from '../utils/state'
 
 export default {
     title: async (title, options?: WaitForOptions) => {
@@ -61,7 +61,7 @@ export default {
         const spinner = utils.log(`wait for request, ${urlOrPath}`)
         let data
         try {
-            await global.page.waitForRequest((request) => {
+            await state.currentPage.waitForRequest((request) => {
                 const urlObj = utils.parseUrl(request.url(), request.url())
 
                 const urlFixed = utils.parseUrl(urlOrPath, urlObj.href)
@@ -98,7 +98,7 @@ export default {
     response: async (urlOrPath, options?: TimeoutOption) => {
         const spinner = utils.log(`wait for response 200, ${urlOrPath}`)
         try {
-            await global.page.waitForResponse((response) => {
+            await state.currentPage.waitForResponse((response) => {
                 const urlObj = utils.parseUrl(response.url(), response.url())
                 const urlFixed = utils.parseUrl(urlOrPath, urlObj.href)
                 return (

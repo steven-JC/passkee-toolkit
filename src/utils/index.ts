@@ -1,7 +1,9 @@
 import ExpectError from './ExpectError'
+import TimeoutError from './TimeoutError'
 import qs from 'qs'
 import * as url from 'url'
 import SpinnerLog from './SpinnerLog'
+import config from './config'
 
 export const compareConst = {
     UNDEFINED: 'UNDEFINED',
@@ -10,23 +12,10 @@ export const compareConst = {
     NOT_EMPTY: 'NOT_EMPTY'
 }
 
-declare const global: any
+import state from '../utils/state'
 declare const $Z: any
 
-class TimeoutError extends Error {
-    constructor(message) {
-        super(message)
-        this.name = 'TimeoutError'
-    }
-}
-
 const utils = {
-    debugMode: false,
-    screenshotSaveFolder: '',
-    mockDataFolder: '',
-
-    mockOptions: {},
-
     log(text, options?): SpinnerLog {
         for (const x in options) {
             if (options.hasOwnProperty(x)) {
@@ -55,7 +44,7 @@ const utils = {
                 }
             }
         }
-        return new SpinnerLog(text, !utils.debugMode)
+        return new SpinnerLog(text, !config.debugMode)
     },
     compareUrl: (urlOrPathOrHash, basetUrl, silent) => {
         const base: any = utils.parseUrl(basetUrl, basetUrl)
@@ -178,7 +167,7 @@ const utils = {
     },
 
     async converToDomSelector(selectors) {
-        const marks = await global.page.$eval(
+        const marks = await state.currentPage.$eval(
             'body',
             (el, selectors) => {
                 return $Z.getMarks($Z.$select(selectors))
@@ -302,27 +291,14 @@ const utils = {
             default:
                 return func.apply(context || this, args)
         }
-    },
-
-    async visible(selector) {
-        return await global.page.$eval(
-            'body',
-            (el, selector) => {
-                const elem = $Z(selector)[0]
-                return elem && !!(elem.offsetHeight || elem.offsetTop)
-            },
-            selector
-        )
-    },
-    async exist(selector) {
-        return await global.page.$eval(
-            'body',
-            (el, selector) => {
-                return !!$Z(selector).length
-            },
-            selector
-        )
     }
+}
+export interface IPlainObject {
+    [key: string]: any
+}
+export interface IOffset {
+    x?: number
+    y?: number
 }
 
 export default utils
