@@ -26,6 +26,11 @@ const props1 = {
 const selectors = ['filter', 'parents', 'parent', 'children', 'find', 'eq']
 // 没时间，只好这样简单校验下
 export default () => {
+    it.only('VSelector.prototype.scroll', async () => {
+        await $('body').scroll(0, 100)
+        await $('body').waitFor.scrollTop(100)
+    })
+
     it('VSelector.prototype.screenshot', async () => {
         await $('body').screenshot('VSelector.prototype.screenshot.png')
     })

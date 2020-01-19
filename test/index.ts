@@ -17,9 +17,9 @@ const time = Date.now()
 describe('puppeteer-testkit', () => {
     before(async () => {
         const browser = await puppeteer.launch({
-            //// headless: false,
-            headless: true,
-            devtools: true
+            headless: false
+            // headless: true,
+            // devtools: true
         })
 
         const page = (await browser.pages())[0]

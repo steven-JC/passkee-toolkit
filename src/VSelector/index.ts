@@ -1,5 +1,6 @@
 import blur from '../triggers/blur'
 import input from '../triggers/input'
+import scroll from '../triggers/scroll'
 import utils, { IOffset } from '../utils'
 import screenshot from '../lib/screenshot'
 import state from '../utils/state'
@@ -8,6 +9,7 @@ import VSExpectPartial from './VSelector.expect'
 import VSWaitForPartial from './VSelector.waitFor'
 import VSProtoPartial from './VSelector.proto'
 import VSMousePartial, { IMouseTrigger } from './VSelector.mouse'
+
 import {
     selectors,
     IVSelectorExpect,
@@ -188,6 +190,24 @@ class VSelector {
                 ])
             )
             await state.currentPage.hover(this.domSelector)
+            spinner.succeed()
+        } catch (e) {
+            spinner.fail(e)
+        }
+    }
+
+    public async scroll(x: number, y: number) {
+        const spinner = utils.log(`hover`, {
+            selectors: this.selectors
+        })
+        try {
+            this.domSelector = await utils.converToDomSelector(
+                utils.assignSelectors(this.selectors, [
+                    { type: 'filter', params: [':visible'] },
+                    { type: 'eq', params: [0] }
+                ])
+            )
+            await scroll(this.domSelector, { x, y })
             spinner.succeed()
         } catch (e) {
             spinner.fail(e)
