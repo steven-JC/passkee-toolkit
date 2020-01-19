@@ -1,5 +1,4 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
 declare var $Z
 export default () => {
     it(`$.waitFor.target`, async () => {

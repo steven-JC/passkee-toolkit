@@ -11,6 +11,13 @@
             "options": {
                 "parser": "typescript"
             }
+        },
+        {
+            "files": "src/**/*.scss",
+            "options": {
+                "singleQuote": false,
+                "semi": true
+            }
         }
     ]
 }

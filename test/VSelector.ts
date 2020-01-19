@@ -1,5 +1,4 @@
-import { TestKit } from '@/typings/TestKit'
-const $: TestKit = require('../index')
+import $ from '../src'
 import path from 'path'
 // 没参数
 const props0 = [
@@ -9,7 +8,6 @@ const props0 = [
     'width',
     'offset',
     'offsetParent',
-    'position',
     'val',
     'index',
     'scrollTop',
@@ -22,26 +20,17 @@ const props1 = {
     attr: 'id',
     prop: 'nodeName',
     data: 'null',
-    is: 'div',
     hasClass: 'login_box'
 }
 // // 选择器
-const selectors = [
-    'has',
-    'not',
-    'parents',
-    'parent',
-    'children',
-    'siblings',
-    'prev',
-    'next',
-    'find',
-    'eq',
-    'first',
-    'last'
-]
+const selectors = ['filter', 'parents', 'parent', 'children', 'find', 'eq']
 // 没时间，只好这样简单校验下
 export default () => {
+    it.only('VSelector.prototype.scroll', async () => {
+        await $('body').scroll(0, 100)
+        await $('body').waitFor.scrollTop(100)
+    })
+
     it('VSelector.prototype.screenshot', async () => {
         await $('body').screenshot('VSelector.prototype.screenshot.png')
     })
