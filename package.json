@@ -1,7 +1,7 @@
 {
-    "name": "error-reporter",
-    "version": "0.1.2",
-    "description": "An error reporter toolkit for tumax.",
+    "name": "puppeteer-toolkit",
+    "version": "0.4.5-alpha.20",
+    "description": "A toolkit for puppeteer to greatly improves test case development efficiency.",
     "main": "dist/index.js",
     "types": "dist/types/index.d.ts",
     "files": [
